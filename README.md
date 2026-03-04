@@ -1,3 +1,4 @@
+<!--
 <div align="center">
 
 <br/>
@@ -10,7 +11,12 @@
 ██║     ███████╗███████╗██╔╝ ██╗██║  ██║██║  ██║
 ╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
 ```
+-->
 
+<div align="center">
+<br/>
+<h1>⬡ PLEXAR</h1>
+    
 **The nervous system for your network.**
 
 *A unified, async-first Python SDK for network automation — transport, parsing, intent, telemetry, topology, and AI in one platform.*
