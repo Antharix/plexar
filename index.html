@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Plexar — Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:        #03060f;
+    --bg2:       #080d1a;
+    --bg3:       #0d1526;
+    --border:    #1a2540;
+    --border2:   #243050;
+    --text:      #c8d4f0;
+    --text-dim:  #5a6a90;
+    --text-mute: #2a3550;
+    --accent:    #00d4ff;
+    --accent2:   #0088cc;
+    --accent3:   #00ffaa;
+    --warn:      #ffaa00;
+    --danger:    #ff4466;
+    --glow:      rgba(0, 212, 255, 0.12);
+    --glow2:     rgba(0, 212, 255, 0.04);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.25;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .logo-wrap {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 0 20px var(--glow);
+  }
+
+  .logo-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--accent);
+    background: var(--glow2);
+    border: 1px solid var(--border2);
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-left: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .search-wrap {
+    padding: 16px 16px 8px;
+  }
+
+  .search-box {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px 8px 34px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235a6a90' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 10px center;
+  }
+
+  .search-box:focus { border-color: var(--accent2); }
+  .search-box::placeholder { color: var(--text-dim); }
+
+  .nav-section {
+    padding: 12px 0 4px;
+  }
+
+  .nav-section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    color: var(--text-mute);
+    padding: 0 20px 6px;
+    text-transform: uppercase;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 20px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 400;
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .nav-item:hover { color: var(--text); background: var(--glow2); }
+  .nav-item.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: var(--glow2);
+    font-weight: 500;
+  }
+
+  .nav-item .dot {
+    width: 5px; height: 5px;
+    background: var(--border2);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .nav-item.active .dot { background: var(--accent); }
+
+  .nav-badge {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+  .badge-new  { background: rgba(0,255,170,0.1); color: var(--accent3); border: 1px solid rgba(0,255,170,0.2); }
+  .badge-wip  { background: rgba(255,170,0,0.1); color: var(--warn);    border: 1px solid rgba(255,170,0,0.2); }
+  .badge-soon { background: rgba(255,68,102,0.1); color: var(--danger); border: 1px solid rgba(255,68,102,0.2); }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .version-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .version-dot { width: 6px; height: 6px; background: var(--accent3); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── MAIN ── */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(3,6,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .breadcrumb {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .breadcrumb span { color: var(--text); }
+  .breadcrumb .sep { color: var(--text-mute); }
+
+  .topbar-actions { display: flex; gap: 8px; }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--border2); background: var(--glow2); }
+
+  .btn-accent {
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 600;
+  }
+  .btn-accent:hover { background: #33ddff; box-shadow: 0 0 20px var(--glow); }
+
+  /* ── CONTENT ── */
+  .content {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 56px 48px 80px;
+    display: none;
+  }
+  .content.active { display: block; animation: fadein 0.25s ease; }
+  @keyframes fadein { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+  /* Hero */
+  .hero {
+    margin-bottom: 56px;
+    position: relative;
+  }
+
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 .accent { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 17px;
+    color: var(--text-dim);
+    max-width: 580px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .btn-lg {
+    padding: 12px 24px;
+    font-size: 14px;
+    border-radius: 8px;
+  }
+
+  .install-block {
+    margin-top: 40px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .install-bar {
+    background: var(--bg2);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dot-red   { width: 10px; height: 10px; border-radius: 50%; background: #ff5f57; }
+  .dot-yel   { width: 10px; height: 10px; border-radius: 50%; background: #febc2e; }
+  .dot-grn   { width: 10px; height: 10px; border-radius: 50%; background: #28c840; }
+  .term-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); margin: 0 auto; }
+
+  .install-code {
+    padding: 20px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 2;
+    overflow-x: auto;
+  }
+
+  .p  { color: var(--text-dim); }       /* prompt */
+  .c  { color: var(--accent3); }        /* command */
+  .s  { color: var(--accent); }         /* string */
+  .k  { color: #cc99ff; }               /* keyword */
+  .fn { color: #ffcc66; }               /* function */
+  .cm { color: var(--text-mute); }      /* comment */
+  .n  { color: var(--text); }           /* normal */
+  .num { color: #ff9966; }
+
+  /* Sections */
+  .section { margin-bottom: 56px; }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  h2 .h-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-mute);
+    font-weight: 400;
+  }
+
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: #e0eaff;
+    margin: 28px 0 12px;
+    letter-spacing: -0.3px;
+  }
+
+  p { color: var(--text-dim); margin-bottom: 14px; }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Code block */
+  .code-block {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+
+  .code-header {
+    background: var(--bg2);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-mute);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .copy-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 2px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent2); }
+
+  .code-body {
+    padding: 20px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 2;
+    overflow-x: auto;
+  }
+
+  /* Callouts */
+  .callout {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    display: flex;
+    gap: 14px;
+    font-size: 14px;
+  }
+
+  .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  .callout-info    { background: rgba(0,212,255,0.06);  border: 1px solid rgba(0,212,255,0.2);  }
+  .callout-warn    { background: rgba(255,170,0,0.06);  border: 1px solid rgba(255,170,0,0.2);  }
+  .callout-success { background: rgba(0,255,170,0.06);  border: 1px solid rgba(0,255,170,0.2);  }
+  .callout-danger  { background: rgba(255,68,102,0.06); border: 1px solid rgba(255,68,102,0.2); }
+
+  .callout-info    .callout-title { color: var(--accent);  }
+  .callout-warn    .callout-title { color: var(--warn);    }
+  .callout-success .callout-title { color: var(--accent3); }
+  .callout-danger  .callout-title { color: var(--danger);  }
+
+  .callout-title { font-weight: 600; font-size: 13px; margin-bottom: 4px; font-family: 'Syne', sans-serif; }
+  .callout p { margin: 0; color: var(--text-dim); font-size: 13.5px; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+    color: var(--text-dim);
+  }
+  tr:hover td { background: var(--glow2); }
+  td:first-child { color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+  .check  { color: var(--accent3); }
+  .cross  { color: var(--danger); }
+  .partial { color: var(--warn); }
+
+  /* Grid cards */
+  .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 24px 0; }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .card:hover {
+    border-color: var(--border2);
+    background: var(--bg3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .card-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .card-desc { font-size: 12.5px; color: var(--text-mute); line-height: 1.5; }
+
+  /* Arch diagram */
+  .arch-diagram {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin: 24px 0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .arch-row {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text-dim);
+    position: relative;
+    transition: all 0.2s;
+  }
+
+  .arch-row:hover { border-color: var(--border2); color: var(--text); }
+  .arch-row.highlight { border-color: var(--accent2); color: var(--accent); background: var(--glow2); }
+  .arch-row .layer-label { position: absolute; left: 16px; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-mute); }
+  .arch-connector { text-align: center; color: var(--text-mute); font-size: 10px; margin: 2px 0; }
+  .arch-chip { background: var(--bg2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 4px; font-size: 11px; }
+
+  /* Step list */
+  .steps { list-style: none; counter-reset: step; }
+  .steps li {
+    counter-increment: step;
+    padding: 14px 0 14px 48px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+  .steps li:last-child { border-bottom: none; }
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 14px;
+    width: 28px;
+    height: 28px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .steps li strong { color: var(--text); }
+
+  /* Platform badges */
+  .platform-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+  .platform-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .platform-badge .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .status-stable { background: var(--accent3); }
+  .status-wip    { background: var(--warn); }
+
+  /* inline code */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--accent);
+  }
+
+  /* Scroll progress */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    z-index: 999;
+    transition: width 0.1s;
+    box-shadow: 0 0 8px var(--glow);
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .content { padding: 32px 20px; }
+    .hero h1 { font-size: 36px; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo-wrap">
+    <a href="#" class="logo" onclick="showPage('home')">
+      <div class="logo-icon">⬡</div>
+      Plexar
+      <span class="logo-tag">v0.1</span>
+    </a>
+  </div>
+
+  <div class="search-wrap">
+    <input class="search-box" placeholder="Search docs..." type="text" id="searchInput"/>
+  </div>
+
+  <nav>
+    <div class="nav-section">
+      <div class="nav-section-label">Getting Started</div>
+      <a class="nav-item active" onclick="showPage('home')"><span class="dot"></span>Introduction</a>
+      <a class="nav-item" onclick="showPage('quickstart')"><span class="dot"></span>Quickstart</a>
+      <a class="nav-item" onclick="showPage('install')"><span class="dot"></span>Installation</a>
+      <a class="nav-item" onclick="showPage('concepts')"><span class="dot"></span>Core Concepts</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Core Modules</div>
+      <a class="nav-item" onclick="showPage('inventory')"><span class="dot"></span>Inventory</a>
+      <a class="nav-item" onclick="showPage('transport')"><span class="dot"></span>Transport & Drivers</a>
+      <a class="nav-item" onclick="showPage('models')"><span class="dot"></span>Data Models</a>
+      <a class="nav-item" onclick="showPage('config')"><span class="dot"></span>Config & Templates</a>
+      <a class="nav-item" onclick="showPage('intent')"><span class="dot"></span>Intent Engine <span class="nav-badge badge-new">NEW</span></a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Observability</div>
+      <a class="nav-item" onclick="showPage('state')"><span class="dot"></span>State & Snapshots</a>
+      <a class="nav-item" onclick="showPage('drift')"><span class="dot"></span>Drift Detection</a>
+      <a class="nav-item" onclick="showPage('telemetry')"><span class="dot"></span>Telemetry <span class="nav-badge badge-wip">WIP</span></a>
+      <a class="nav-item" onclick="showPage('topology')"><span class="dot"></span>Topology Engine <span class="nav-badge badge-wip">WIP</span></a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">AI & Simulation</div>
+      <a class="nav-item" onclick="showPage('ai')"><span class="dot"></span>AI Engine <span class="nav-badge badge-soon">SOON</span></a>
+      <a class="nav-item" onclick="showPage('twin')"><span class="dot"></span>Digital Twin <span class="nav-badge badge-soon">SOON</span></a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Testing</div>
+      <a class="nav-item" onclick="showPage('testing')"><span class="dot"></span>Testing Framework</a>
+      <a class="nav-item" onclick="showPage('mock')"><span class="dot"></span>Mock Driver</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Reference</div>
+      <a class="nav-item" onclick="showPage('drivers')"><span class="dot"></span>Vendor Drivers</a>
+      <a class="nav-item" onclick="showPage('contributing')"><span class="dot"></span>Contributing</a>
+      <a class="nav-item" onclick="showPage('changelog')"><span class="dot"></span>Changelog</a>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="version-pill">
+      <span class="version-dot"></span>
+      v0.1.0-alpha · Apache 2.0
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main" id="main" onscroll="updateProgress()">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="breadcrumb">
+      plexar / <span id="breadcrumb-current">introduction</span>
+    </div>
+    <div class="topbar-actions">
+      <a href="https://github.com/plexar/plexar" class="btn btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+      <a href="#" class="btn btn-accent btn-ghost">pip install plexar</a>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: HOME ═══════ -->
+  <div class="content active" id="page-home">
+    <div class="hero">
+      <div class="hero-eyebrow">Documentation</div>
+      <h1>The <span class="accent">nervous system</span><br/>for your network.</h1>
+      <p class="hero-sub">Plexar is a unified, async-first Python SDK for network automation. Transport, parsing, intent, telemetry, topology, and AI — in one coherent platform.</p>
+      <div class="hero-actions">
+        <a onclick="showPage('quickstart')" class="btn btn-accent btn-lg">Get Started →</a>
+        <a onclick="showPage('concepts')" class="btn btn-ghost btn-lg">Core Concepts</a>
+      </div>
+
+      <div class="install-block">
+        <div class="install-bar">
+          <div class="dot-red"></div><div class="dot-yel"></div><div class="dot-grn"></div>
+          <div class="term-title">terminal</div>
+        </div>
+        <div class="install-code">
+          <div><span class="p">$</span> <span class="c">pip install</span> <span class="s">plexar</span></div>
+          <div><span class="cm"># or with all extras</span></div>
+          <div><span class="p">$</span> <span class="c">pip install</span> <span class="s">"plexar[all]"</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><span class="h-num">01</span> Why Plexar?</h2>
+      <p>The Python network automation ecosystem is fragmented. Netmiko for SSH, NAPALM for abstraction, Nornir for orchestration, TextFSM for parsing, pyATS for testing — each excellent at one thing, none solving the whole problem.</p>
+      <p>Plexar is designed from the ground up as a <strong>platform SDK</strong> — a single, layered system that handles every domain of network automation, with an async-first architecture and AI capabilities built in.</p>
+
+      <div class="arch-diagram">
+        <div class="arch-row highlight">
+          <span class="layer-label">API</span>
+          <span class="arch-chip">net.devices()</span>
+          <span class="arch-chip">device.get_bgp()</span>
+          <span class="arch-chip">intent.apply()</span>
+          <span class="arch-chip">ai.ask()</span>
+        </div>
+        <div class="arch-connector">↕</div>
+        <div class="arch-row">
+          <span class="layer-label">INTELLIGENCE</span>
+          <span class="arch-chip">AI Engine</span>
+          <span class="arch-chip">Intent Engine</span>
+          <span class="arch-chip">Drift Detection</span>
+        </div>
+        <div class="arch-connector">↕</div>
+        <div class="arch-row">
+          <span class="layer-label">OBSERVABILITY</span>
+          <span class="arch-chip">State Manager</span>
+          <span class="arch-chip">Topology Graph</span>
+          <span class="arch-chip">Telemetry</span>
+        </div>
+        <div class="arch-connector">↕</div>
+        <div class="arch-row">
+          <span class="layer-label">ABSTRACTION</span>
+          <span class="arch-chip">Vendor-Neutral Models</span>
+          <span class="arch-chip">Parsers</span>
+          <span class="arch-chip">Config Engine</span>
+        </div>
+        <div class="arch-connector">↕</div>
+        <div class="arch-row">
+          <span class="layer-label">TRANSPORT</span>
+          <span class="arch-chip">SSH</span>
+          <span class="arch-chip">NETCONF</span>
+          <span class="arch-chip">gNMI</span>
+          <span class="arch-chip">RESTCONF</span>
+          <span class="arch-chip">SNMP</span>
+        </div>
+        <div class="arch-connector">↕</div>
+        <div class="arch-row">
+          <span class="layer-label">DEVICES</span>
+          <span class="arch-chip">Cisco</span>
+          <span class="arch-chip">Juniper</span>
+          <span class="arch-chip">Arista</span>
+          <span class="arch-chip">Palo Alto</span>
+          <span class="arch-chip">Nokia</span>
+          <span class="arch-chip">+ more</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><span class="h-num">02</span> Explore the Docs</h2>
+      <div class="card-grid">
+        <a class="card" onclick="showPage('quickstart')">
+          <div class="card-icon">⚡</div>
+          <div class="card-title">Quickstart</div>
+          <div class="card-desc">Connect to your first device and run a query in under 5 minutes.</div>
+        </a>
+        <a class="card" onclick="showPage('intent')">
+          <div class="card-icon">🎯</div>
+          <div class="card-title">Intent Engine</div>
+          <div class="card-desc">Declare what you want. Plexar compiles it to vendor config automatically.</div>
+        </a>
+        <a class="card" onclick="showPage('drift')">
+          <div class="card-icon">📡</div>
+          <div class="card-title">Drift Detection</div>
+          <div class="card-desc">Continuously compare running state against desired state. Alert or auto-fix.</div>
+        </a>
+        <a class="card" onclick="showPage('ai')">
+          <div class="card-icon">🤖</div>
+          <div class="card-title">AI Engine</div>
+          <div class="card-desc">Natural language RCA, autonomous remediation, and LLM-assisted parsing.</div>
+        </a>
+        <a class="card" onclick="showPage('testing')">
+          <div class="card-icon">🧪</div>
+          <div class="card-title">Testing Framework</div>
+          <div class="card-desc">pytest-native network state assertions with a full mock driver for CI/CD.</div>
+        </a>
+        <a class="card" onclick="showPage('drivers')">
+          <div class="card-icon">🔌</div>
+          <div class="card-title">Vendor Drivers</div>
+          <div class="card-desc">Supported platforms, transport matrix, and how to write your own driver.</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: QUICKSTART ═══════ -->
+  <div class="content" id="page-quickstart">
+    <div class="hero">
+      <div class="hero-eyebrow">Getting Started</div>
+      <h1>Quickstart</h1>
+      <p class="hero-sub">Connect to a device, fetch structured data, and push a config change — in minutes.</p>
+    </div>
+
+    <div class="section">
+      <h2><span class="h-num">01</span> Install</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body">
+          <span class="c">pip install</span> <span class="s">plexar</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><span class="h-num">02</span> Connect to a Device</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body">
+<span class="k">from</span> <span class="n">plexar.core</span> <span class="k">import</span> <span class="n">Device, Credentials, Transport</span>
+<span class="k">import</span> <span class="n">asyncio</span>
+
+<span class="k">async def</span> <span class="fn">main</span>():
+    device = <span class="fn">Device</span>(
+        hostname=<span class="s">"spine-01"</span>,
+        management_ip=<span class="s">"10.0.0.1"</span>,
+        platform=<span class="s">"arista_eos"</span>,
+        transport=<span class="n">Transport.SSH</span>,
+        credentials=<span class="fn">Credentials</span>(
+            username=<span class="s">"admin"</span>,
+            password_env=<span class="s">"DEVICE_PASS"</span>  <span class="cm"># reads from $DEVICE_PASS</span>
+        )
+    )
+
+    <span class="k">await</span> device.<span class="fn">connect</span>()
+
+    <span class="cm"># Fetch normalized BGP data — not raw CLI text</span>
+    bgp = <span class="k">await</span> device.<span class="fn">get_bgp_summary</span>()
+
+    <span class="k">for</span> peer <span class="k">in</span> bgp.peers:
+        <span class="fn">print</span>(<span class="s">f"</span>{peer.neighbor_ip}<span class="s"> → </span>{peer.state}<span class="s"> ({peer.prefixes_received} prefixes)"</span>)
+
+    <span class="k">await</span> device.<span class="fn">disconnect</span>()
+
+asyncio.<span class="fn">run</span>(<span class="fn">main</span>())
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><span class="h-num">03</span> Run Across Many Devices</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body">
+<span class="k">from</span> <span class="n">plexar</span> <span class="k">import</span> <span class="n">Network</span>
+
+<span class="k">async def</span> <span class="fn">main</span>():
+    net = <span class="fn">Network</span>()
+    net.inventory.<span class="fn">load</span>(<span class="s">"yaml"</span>, path=<span class="s">"./inventory.yaml"</span>)
+
+    leafs = net.<span class="fn">devices</span>(role=<span class="s">"leaf"</span>)
+
+    <span class="cm"># Concurrent across all leafs — async pool with rate limiting</span>
+    <span class="k">async with</span> net.<span class="fn">pool</span>(max_concurrent=<span class="num">50</span>) <span class="k">as</span> pool:
+        results = <span class="k">await</span> pool.<span class="fn">map</span>(
+            <span class="k">lambda</span> d: d.<span class="fn">get_bgp_summary</span>(),
+            devices=leafs
+        )
+
+    <span class="k">for</span> device, bgp <span class="k">in</span> results:
+        down = [p <span class="k">for</span> p <span class="k">in</span> bgp.peers <span class="k">if</span> p.state != <span class="s">"established"</span>]
+        <span class="k">if</span> down:
+            <span class="fn">print</span>(<span class="s">f"⚠ {device.hostname}: {len(down)} peers down"</span>)
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">💡</div>
+        <div>
+          <div class="callout-title">Async throughout</div>
+          <p>Plexar's pool handles concurrency, connection management, rate limiting, and retries automatically. You write business logic — not threading code.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><span class="h-num">04</span> Push Config with Rollback</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body">
+<span class="k">async with</span> device.<span class="fn">transaction</span>() <span class="k">as</span> txn:
+    <span class="k">await</span> txn.<span class="fn">push</span>(config_block)
+
+    ok = <span class="k">await</span> txn.<span class="fn">verify</span>([
+        (<span class="s">"bgp_peers"</span>, <span class="k">lambda</span> r: r.peers_established >= <span class="num">4</span>),
+        (<span class="s">"interfaces"</span>, <span class="k">lambda</span> r: r.uplink.oper_state == <span class="s">"up"</span>),
+    ])
+
+    <span class="k">if not</span> ok:
+        <span class="k">await</span> txn.<span class="fn">rollback</span>()  <span class="cm"># guaranteed — no partial state</span>
+        raise <span class="fn">VerificationFailed</span>(<span class="s">"Post-push checks failed"</span>)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: INTENT ═══════ -->
+  <div class="content" id="page-intent">
+    <div class="hero">
+      <div class="hero-eyebrow">Core Modules</div>
+      <h1>Intent Engine</h1>
+      <p class="hero-sub">Declare <em>what</em> you want. Plexar compiles it into vendor-specific configuration and verifies the outcome.</p>
+    </div>
+
+    <div class="section">
+      <div class="callout callout-success">
+        <div class="callout-icon">🎯</div>
+        <div>
+          <div class="callout-title">Intent-based networking</div>
+          <p>Instead of writing Cisco config for leaf-01, Arista config for leaf-02, and Juniper config for leaf-03 — you describe the desired state once and Plexar compiles it per vendor.</p>
+        </div>
+      </div>
+
+      <h2><span class="h-num">01</span> Basic Intent</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body">
+<span class="k">from</span> <span class="n">plexar.intent</span> <span class="k">import</span> <span class="n">Intent</span>
+<span class="k">from</span> <span class="n">plexar.intent.primitives</span> <span class="k">import</span> <span class="n">BGPIntent, InterfaceIntent, VLANIntent</span>
+
+intent = <span class="fn">Intent</span>(devices=net.<span class="fn">devices</span>(role=<span class="s">"leaf"</span>))
+
+<span class="cm"># BGP — compiles to correct syntax per vendor</span>
+intent.<span class="fn">ensure</span>(<span class="fn">BGPIntent</span>(
+    asn=<span class="num">65001</span>,
+    neighbors=[<span class="s">"10.0.0.1"</span>, <span class="s">"10.0.0.2"</span>],
+    address_family=<span class="s">"evpn"</span>,
+    bfd=<span class="k">True</span>
+))
+
+<span class="cm"># Interface — normalized across all platforms</span>
+intent.<span class="fn">ensure</span>(<span class="fn">InterfaceIntent</span>(
+    name=<span class="s">"Ethernet1"</span>,
+    mtu=<span class="num">9214</span>,
+    admin_state=<span class="s">"up"</span>,
+    description=<span class="s">"uplink-to-spine-01"</span>
+))
+
+<span class="cm"># Preview what will change — per device, per vendor</span>
+plan = <span class="k">await</span> intent.<span class="fn">compile</span>()
+<span class="fn">print</span>(plan.<span class="fn">diff</span>())
+
+<span class="cm"># Apply and verify</span>
+result = <span class="k">await</span> intent.<span class="fn">apply</span>()
+report = <span class="k">await</span> intent.<span class="fn">verify</span>()
+<span class="fn">print</span>(report.compliant)  <span class="cm"># True</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><span class="h-num">02</span> Available Primitives</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Primitive</th><th>Description</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>BGPIntent</td><td>BGP peer, ASN, address families, timers, BFD</td><td><span class="check">✓ stable</span></td></tr>
+            <tr><td>InterfaceIntent</td><td>Admin state, MTU, description, IP, speed</td><td><span class="check">✓ stable</span></td></tr>
+            <tr><td>VLANIntent</td><td>VLAN ID, name, trunk/access assignment</td><td><span class="check">✓ stable</span></td></tr>
+            <tr><td>OSPFIntent</td><td>OSPF area, process ID, passive interfaces</td><td><span class="partial">⚡ in progress</span></td></tr>
+            <tr><td>ACLIntent</td><td>Access list rules, application to interfaces</td><td><span class="partial">⚡ in progress</span></td></tr>
+            <tr><td>MPLSIntent</td><td>LDP, RSVP, segment routing</td><td><span class="cross">○ roadmap</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: DRIVERS ═══════ -->
+  <div class="content" id="page-drivers">
+    <div class="hero">
+      <div class="hero-eyebrow">Reference</div>
+      <h1>Vendor Drivers</h1>
+      <p class="hero-sub">Supported platforms, transport matrix, and how to write a custom driver.</p>
+    </div>
+
+    <div class="section">
+      <h2><span class="h-num">01</span> Support Matrix</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Platform</th><th>SSH</th><th>NETCONF</th><th>RESTCONF</th><th>gNMI</th></tr></thead>
+          <tbody>
+            <tr><td>cisco_ios</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="partial">⚡</span></td></tr>
+            <tr><td>cisco_nxos</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="partial">⚡</span></td></tr>
+            <tr><td>cisco_xr</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+            <tr><td>arista_eos</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+            <tr><td>juniper_junos</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="partial">⚡</span></td><td><span class="partial">⚡</span></td></tr>
+            <tr><td>paloalto_panos</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="cross">—</span></td></tr>
+            <tr><td>fortinet_fortios</td><td><span class="check">✓</span></td><td><span class="partial">⚡</span></td><td><span class="check">✓</span></td><td><span class="cross">—</span></td></tr>
+            <tr><td>nokia_sros</td><td><span class="partial">⚡</span></td><td><span class="check">✓</span></td><td><span class="partial">⚡</span></td><td><span class="check">✓</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; margin-top: 8px;">
+        <span class="check">✓</span> Stable &nbsp;
+        <span class="partial">⚡</span> In Progress &nbsp;
+        <span class="cross">—</span> Roadmap
+      </p>
+    </div>
+
+    <div class="section">
+      <h2><span class="h-num">02</span> Writing a Custom Driver</h2>
+      <p>Drivers implement a single abstract base class. New vendor = new class. Zero core changes.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body">
+<span class="k">from</span> <span class="n">plexar.drivers.base</span> <span class="k">import</span> <span class="n">BaseDriver</span>
+<span class="k">from</span> <span class="n">plexar.models</span> <span class="k">import</span> <span class="n">Interface, BGPSummary, RoutingTable</span>
+
+<span class="k">class</span> <span class="fn">MyVendorDriver</span>(<span class="n">BaseDriver</span>):
+    platform = <span class="s">"myvendor_os"</span>
+
+    <span class="k">async def</span> <span class="fn">connect</span>(self) -> <span class="k">None</span>:
+        self._conn = <span class="k">await</span> <span class="fn">my_ssh_connect</span>(self.device)
+
+    <span class="k">async def</span> <span class="fn">get_interfaces</span>(self) -> list[<span class="n">Interface</span>]:
+        raw = <span class="k">await</span> self._conn.<span class="fn">run</span>(<span class="s">"show interfaces"</span>)
+        <span class="k">return</span> self._parse_interfaces(raw)
+
+    <span class="k">async def</span> <span class="fn">get_bgp_summary</span>(self) -> <span class="n">BGPSummary</span>:
+        raw = <span class="k">await</span> self._conn.<span class="fn">run</span>(<span class="s">"show bgp summary"</span>)
+        <span class="k">return</span> self._parse_bgp(raw)
+
+    <span class="cm"># ... implement remaining abstract methods</span>
+        </div>
+      </div>
+      <div class="callout callout-info">
+        <div class="callout-icon">📦</div>
+        <div>
+          <div class="callout-title">Register your driver</div>
+          <p>Add <code>entry_points</code> in your <code>pyproject.toml</code> under <code>plexar.drivers</code> and Plexar will auto-discover it at import time.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: AI ═══════ -->
+  <div class="content" id="page-ai">
+    <div class="hero">
+      <div class="hero-eyebrow">AI & Simulation</div>
+      <h1>AI Engine</h1>
+      <p class="hero-sub">Natural language queries, root cause analysis, autonomous remediation, and LLM-assisted parsing for unknown CLI output.</p>
+    </div>
+
+    <div class="callout callout-warn" style="margin: 0 48px 0; max-width: 860px;">
+      <div class="callout-icon">⚡</div>
+      <div>
+        <div class="callout-title">Coming in v0.3</div>
+        <p>The AI Engine is under active development. API design is stable; implementation ships in v0.3.</p>
+      </div>
+    </div>
+
+    <div class="section" style="margin-top: 40px;">
+      <h2><span class="h-num">01</span> Natural Language RCA</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body">
+<span class="k">from</span> <span class="n">plexar.ai</span> <span class="k">import</span> <span class="n">NetworkAI</span>
+
+ai = <span class="fn">NetworkAI</span>(net, llm_provider=<span class="s">"openai"</span>)
+
+rca = <span class="k">await</span> ai.<span class="fn">ask</span>(<span class="s">"Why is traffic slow between dc1 and dc2?"</span>)
+
+<span class="fn">print</span>(rca.root_cause)       <span class="cm"># "BGP prefix limit on leaf-03"</span>
+<span class="fn">print</span>(rca.affected_devices)  <span class="cm"># ["leaf-03", "spine-01"]</span>
+<span class="fn">print</span>(rca.evidence)          <span class="cm"># telemetry + route data used</span>
+<span class="fn">print</span>(rca.recommendation)    <span class="cm"># "Increase prefix-limit or add filter"</span>
+        </div>
+      </div>
+
+      <h2><span class="h-num">02</span> Autonomous Remediation</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body">
+<span class="cm"># With human approval gate</span>
+plan = <span class="k">await</span> ai.<span class="fn">remediate</span>(rca, require_approval=<span class="k">True</span>)
+
+<span class="fn">print</span>(plan.<span class="fn">summary</span>())   <span class="cm"># shows exactly what it will do</span>
+<span class="k">await</span> plan.<span class="fn">approve</span>()    <span class="cm"># human-in-the-loop</span>
+<span class="k">await</span> plan.<span class="fn">execute</span>()    <span class="cm"># applies + verifies</span>
+        </div>
+      </div>
+
+      <h2><span class="h-num">03</span> LLM-Assisted Parser</h2>
+      <p>For commands with no existing template, the AI parser extracts structured data using an LLM — returning a validated Pydantic model.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body">
+raw    = <span class="k">await</span> device.<span class="fn">run</span>(<span class="s">"show platform hardware qos queue-stats"</span>)
+parsed = <span class="k">await</span> ai.<span class="fn">parse</span>(raw, hint=<span class="s">"QoS queue statistics"</span>)
+
+<span class="fn">print</span>(parsed.queues[<span class="num">0</span>].dropped_packets)  <span class="cm"># fully typed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: TESTING ═══════ -->
+  <div class="content" id="page-testing">
+    <div class="hero">
+      <div class="hero-eyebrow">Testing</div>
+      <h1>Testing Framework</h1>
+      <p class="hero-sub">pytest-native network state assertions. Run in CI/CD without real devices using the built-in mock driver.</p>
+    </div>
+
+    <div class="section">
+      <h2><span class="h-num">01</span> Writing Network Tests</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body">
+<span class="cm"># test_network.py</span>
+<span class="k">import</span> <span class="n">pytest</span>
+<span class="k">from</span> <span class="n">plexar.testing</span> <span class="k">import</span> <span class="n">net_fixture</span>
+
+<span class="k">@pytest.mark.asyncio</span>
+<span class="k">async def</span> <span class="fn">test_all_bgp_peers_established</span>(net):
+    <span class="k">async for</span> device <span class="k">in</span> net.<span class="fn">devices</span>(role=<span class="s">"leaf"</span>):
+        bgp = <span class="k">await</span> device.<span class="fn">get_bgp_summary</span>()
+        <span class="k">assert</span> <span class="fn">all</span>(p.state == <span class="s">"established"</span> <span class="k">for</span> p <span class="k">in</span> bgp.peers), \
+            <span class="s">f"{device.hostname}: BGP peers not all established"</span>
+
+<span class="k">async def</span> <span class="fn">test_no_config_drift</span>(net):
+    report = <span class="k">await</span> net.<span class="fn">drift_report</span>()
+    <span class="k">assert</span> report.is_clean, report.<span class="fn">summary</span>()
+
+<span class="k">async def</span> <span class="fn">test_default_route_exists</span>(net):
+    core = <span class="k">await</span> net.<span class="fn">device</span>(<span class="s">"core-sw-01"</span>)
+    <span class="k">await</span> net.<span class="fn">assert_route</span>(<span class="s">"0.0.0.0/0"</span>, device=core)
+        </div>
+      </div>
+
+      <h2><span class="h-num">02</span> Mock Driver for CI/CD</h2>
+      <p>Test your automation logic without any real devices. The mock driver returns configurable fixture data.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body">
+<span class="k">from</span> <span class="n">plexar.drivers.mock</span> <span class="k">import</span> <span class="n">MockDriver</span>
+<span class="k">from</span> <span class="n">plexar.models</span> <span class="k">import</span> <span class="n">BGPSummary, BGPPeer</span>
+
+mock = <span class="fn">MockDriver</span>()
+mock.<span class="fn">set_response</span>(<span class="s">"get_bgp_summary"</span>, <span class="fn">BGPSummary</span>(
+    peers=[
+        <span class="fn">BGPPeer</span>(neighbor_ip=<span class="s">"10.0.0.1"</span>, state=<span class="s">"established"</span>, prefixes_received=<span class="num">150</span>),
+        <span class="fn">BGPPeer</span>(neighbor_ip=<span class="s">"10.0.0.2"</span>, state=<span class="s">"established"</span>, prefixes_received=<span class="num">148</span>),
+    ]
+))
+
+<span class="cm"># Your tests run against mock — identical API surface</span>
+device = <span class="fn">Device</span>(..., driver=mock)
+bgp = <span class="k">await</span> device.<span class="fn">get_bgp_summary</span>()
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: DRIFT ═══════ -->
+  <div class="content" id="page-drift">
+    <div class="hero">
+      <div class="hero-eyebrow">Observability</div>
+      <h1>Drift Detection</h1>
+      <p class="hero-sub">Continuously compare running network state against desired state. Alert your team or auto-remediate.</p>
+    </div>
+
+    <div class="section">
+      <h2><span class="h-num">01</span> How It Works</h2>
+      <ol class="steps">
+        <li><strong>Define desired state</strong> — from NetBox, YAML, Git, or any inventory source</li>
+        <li><strong>Collect running state</strong> — Plexar polls devices on your schedule</li>
+        <li><strong>Compute diff</strong> — semantic diff engine compares field-by-field</li>
+        <li><strong>Fire callbacks</strong> — alert, log, or auto-remediate on any drift event</li>
+      </ol>
+
+      <h2><span class="h-num">02</span> Setup</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body">
+<span class="k">from</span> <span class="n">plexar.state</span> <span class="k">import</span> <span class="n">DriftMonitor</span>
+
+monitor = <span class="fn">DriftMonitor</span>(
+    inventory=net.inventory,
+    desired_state_source=<span class="s">"netbox"</span>,
+    interval_seconds=<span class="num">300</span>  <span class="cm"># check every 5 min</span>
+)
+
+<span class="k">@monitor.on_drift</span>
+<span class="k">async def</span> <span class="fn">handle_drift</span>(event):
+    <span class="k">await</span> <span class="fn">slack_alert</span>(
+        channel=<span class="s">"#network-ops"</span>,
+        message=<span class="s">f"Drift on {event.device.hostname}:\n{event.diff.summary()}"</span>
+    )
+
+    <span class="cm"># Optional: auto-remediate low-risk drift</span>
+    <span class="k">if</span> event.risk_score < <span class="num">20</span>:
+        <span class="k">await</span> event.<span class="fn">remediate</span>()
+
+<span class="k">await</span> monitor.<span class="fn">start</span>()
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: CONTRIBUTING ═══════ -->
+  <div class="content" id="page-contributing">
+    <div class="hero">
+      <div class="hero-eyebrow">Reference</div>
+      <h1>Contributing</h1>
+      <p class="hero-sub">Plexar is open source. The most impactful contribution is a new vendor driver.</p>
+    </div>
+
+    <div class="section">
+      <h2><span class="h-num">01</span> Setup Dev Environment</h2>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-body">
+<span class="p">$</span> <span class="c">git clone</span> <span class="s">https://github.com/plexar/plexar</span>
+<span class="p">$</span> <span class="c">cd</span> plexar
+<span class="p">$</span> <span class="c">pip install</span> <span class="s">-e ".[dev]"</span>
+<span class="p">$</span> <span class="c">pytest</span>                    <span class="cm"># run full test suite</span>
+<span class="p">$</span> <span class="c">pytest</span> <span class="s">tests/unit/</span>        <span class="cm"># unit tests only (no devices)</span>
+        </div>
+      </div>
+
+      <h2><span class="h-num">02</span> What We Need Most</h2>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">🔌</div>
+          <div class="card-title">Vendor Drivers</div>
+          <div class="card-desc">Nokia SR-OS, Mikrotik, Cumulus, SONiC, Huawei VRP — all need drivers.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📝</div>
+          <div class="card-title">Parser Templates</div>
+          <div class="card-desc">TTP templates for new platforms and commands expand our coverage.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🧪</div>
+          <div class="card-title">Test Cases</div>
+          <div class="card-desc">Real device output samples for existing parsers to catch edge cases.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📚</div>
+          <div class="card-title">Documentation</div>
+          <div class="card-desc">Examples, tutorials, and corrections — all welcome.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PAGE: CHANGELOG ═══════ -->
+  <div class="content" id="page-changelog">
+    <div class="hero">
+      <div class="hero-eyebrow">Reference</div>
+      <h1>Changelog</h1>
+      <p class="hero-sub">What's new in Plexar.</p>
+    </div>
+
+    <div class="section">
+      <h3>v0.1.0-alpha — <span style="color:var(--text-mute)">Current</span></h3>
+      <div class="callout callout-success">
+        <div class="callout-icon">🚀</div>
+        <div>
+          <div class="callout-title">Initial Release</div>
+          <p>Core device model, async SSH transport, Cisco IOS/NX-OS, Arista EOS, and Juniper JunOS drivers. Normalized Interface, BGP, and RoutingTable models. Mock driver for testing.</p>
+        </div>
+      </div>
+
+      <h3>v0.2.0 — <span style="color:var(--text-mute)">Planned</span></h3>
+      <p style="color: var(--text-mute)">NETCONF driver, config diff engine, transactional push, drift detection v1, intent engine primitives (BGP, Interface, VLAN).</p>
+
+      <h3>v0.3.0 — <span style="color:var(--text-mute)">Planned</span></h3>
+      <p style="color: var(--text-mute)">AI Engine (RCA, parser, remediation), gNMI telemetry, topology graph, LLDP discovery.</p>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const pages = {};
+  document.querySelectorAll('.content').forEach(p => {
+    pages[p.id.replace('page-', '')] = p;
+  });
+
+  const navItems = document.querySelectorAll('.nav-item');
+
+  function showPage(name) {
+    Object.values(pages).forEach(p => p.classList.remove('active'));
+    navItems.forEach(n => n.classList.remove('active'));
+
+    const page = pages[name];
+    if (page) {
+      page.classList.add('active');
+      document.getElementById('main').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Update active nav
+    navItems.forEach(item => {
+      if (item.getAttribute('onclick')?.includes(`'${name}'`)) {
+        item.classList.add('active');
+      }
+    });
+
+    // Update breadcrumb
+    const labels = {
+      home: 'introduction', quickstart: 'quickstart', install: 'installation',
+      concepts: 'core concepts', inventory: 'inventory', transport: 'transport & drivers',
+      models: 'data models', config: 'config & templates', intent: 'intent engine',
+      state: 'state & snapshots', drift: 'drift detection', telemetry: 'telemetry',
+      topology: 'topology engine', ai: 'ai engine', twin: 'digital twin',
+      testing: 'testing framework', mock: 'mock driver', drivers: 'vendor drivers',
+      contributing: 'contributing', changelog: 'changelog'
+    };
+    document.getElementById('breadcrumb-current').textContent = labels[name] || name;
+  }
+
+  function updateProgress() {
+    const el = document.getElementById('main');
+    const pct = (el.scrollTop / (el.scrollHeight - el.clientHeight)) * 100;
+    document.getElementById('progress').style.width = pct + '%';
+  }
+
+  function copyCode(btn) {
+    const code = btn.closest('.code-block').querySelector('.code-body').innerText;
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = 'copied!';
+      setTimeout(() => btn.textContent = 'copy', 1500);
+    });
+  }
+
+  // Search filter
+  document.getElementById('searchInput').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    navItems.forEach(item => {
+      item.style.display = !q || item.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+</script>
+</body>
+</html>
