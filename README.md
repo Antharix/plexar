@@ -15,8 +15,8 @@
 
 <br/>
 
-<!-- [![PyPI version](https://img.shields.io/pypi/v/plexar?color=00D4FF&labelColor=0A0F1E&style=for-the-badge)](https://pypi.org/project/plexar/) -->
-[![PyPI](https://img.shields.io/pypi/v/plexar)](https://pypi.org/project/plexar)
+[PyPI](https://img.shields.io/pypi/v/plexar?color=00D4FF&labelColor=0A0F1E&style=for-the-badge)](https://pypi.org/project/plexar/)
+<!-- [![PyPI](https://img.shields.io/pypi/v/plexar)](https://pypi.org/project/plexar) -->
 [![Python](https://img.shields.io/badge/python-3.11%2B-00D4FF?labelColor=0A0F1E&style=for-the-badge)](https://python.org)
 [![License](https://img.shields.io/badge/license-Apache%202.0-00D4FF?labelColor=0A0F1E&style=for-the-badge)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-plexar.dev-00D4FF?labelColor=0A0F1E&style=for-the-badge)](https://antharix.github.io/plexar/)
