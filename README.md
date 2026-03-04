@@ -203,9 +203,9 @@ async def test_no_config_drift(net):
 ├─────────────────────────────────────────────────────┤
 │              DEVICE ABSTRACTION LAYER               │
 ├─────────────────────────────────────────────────────┤
-│     SSH  ·  NETCONF  ·  RESTCONF  ·  gNMI  ·  SNMP │
+│     SSH  ·  NETCONF  ·  RESTCONF  ·  gNMI  ·  SNMP  │
 ├─────────────────────────────────────────────────────┤
-│   Cisco  ·  Juniper  ·  Arista  ·  Palo Alto  · …  │
+│   Cisco  ·  Juniper  ·  Arista  ·  Palo Alto  · …   │
 └─────────────────────────────────────────────────────┘
 ```
 
