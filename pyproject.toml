@@ -1,0 +1,132 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "plexar"
+version = "0.1.0a1"
+description = "The nervous system for your network — a unified, async-first Python SDK for network automation."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.11"
+authors = [{ name = "Plexar Contributors" }]
+keywords = [
+    "network", "automation", "netops", "ssh", "netconf", "gnmi",
+    "cisco", "juniper", "arista", "intent", "async"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Networking",
+    "Framework :: AsyncIO",
+    "Typing :: Typed",
+]
+
+# Core dependencies — kept minimal on purpose
+dependencies = [
+    "pydantic>=2.5",
+    "scrapli[asyncssh]>=2024.1",
+    "asyncssh>=2.14",
+    "jinja2>=3.1",
+    "pyyaml>=6.0",
+    "anyio>=4.0",
+    "rich>=13.0",           # CLI output formatting
+    "httpx>=0.26",          # REST/RESTCONF transport
+    "ttp>=0.9",             # CLI parsing
+    "netutils>=1.6",        # IP/prefix utilities
+]
+
+[project.optional-dependencies]
+netconf = [
+    "ncclient>=0.6",
+]
+gnmi = [
+    "grpcio>=1.60",
+    "grpcio-tools>=1.60",
+    "protobuf>=4.25",
+]
+ai = [
+    "litellm>=1.20",        # model-agnostic LLM calls
+    "openai>=1.10",
+]
+netbox = [
+    "pynetbox>=7.3",
+]
+telemetry = [
+    "opentelemetry-sdk>=1.22",
+    "opentelemetry-exporter-otlp>=1.22",
+    "confluent-kafka>=2.3",
+]
+dev = [
+    "pytest>=7.4",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=4.1",
+    "black>=23.12",
+    "ruff>=0.1",
+    "mypy>=1.8",
+    "pre-commit>=3.6",
+    "respx>=0.20",          # httpx mocking
+    "faker>=22.0",
+]
+all = [
+    "plexar[netconf,gnmi,ai,netbox,telemetry]",
+]
+
+[project.urls]
+Homepage    = "https://plexar.dev"
+Repository  = "https://github.com/plexar/plexar"
+Docs        = "https://plexar.dev/docs"
+Changelog   = "https://github.com/plexar/plexar/blob/main/CHANGELOG.md"
+
+[project.entry-points."plexar.drivers"]
+# Vendor drivers auto-discovered at import time
+cisco_ios   = "plexar.vendors.cisco.ios:CiscoIOSDriver"
+cisco_nxos  = "plexar.vendors.cisco.nxos:CiscoNXOSDriver"
+cisco_xr    = "plexar.vendors.cisco.xr:CiscoXRDriver"
+arista_eos  = "plexar.vendors.arista.eos:AristaEOSDriver"
+juniper_junos = "plexar.vendors.juniper.junos:JuniperJunOSDriver"
+
+[tool.hatch.build.targets.wheel]
+packages = ["plexar"]
+
+# ── Pytest ──────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+asyncio_mode    = "auto"
+testpaths       = ["tests"]
+addopts         = "-v --tb=short --cov=plexar --cov-report=term-missing"
+filterwarnings  = ["ignore::DeprecationWarning"]
+
+# ── Ruff (linting) ──────────────────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "RET", "SIM", "TCH"]
+ignore = ["B008", "N818"]
+
+[tool.ruff.isort]
+known-first-party = ["plexar"]
+
+# ── Black (formatting) ──────────────────────────────────────────────
+[tool.black]
+line-length    = 100
+target-version = ["py311"]
+
+# ── Mypy (type checking) ─────────────────────────────────────────────
+[tool.mypy]
+python_version         = "3.11"
+strict                 = true
+ignore_missing_imports = true
+show_error_codes       = true
+
+# ── Coverage ────────────────────────────────────────────────────────
+[tool.coverage.run]
+source   = ["plexar"]
+omit     = ["plexar/__main__.py", "*/tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false

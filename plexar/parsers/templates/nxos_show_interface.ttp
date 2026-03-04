@@ -1,0 +1,10 @@
+{% set interfaces = [] %}
+<group name="interfaces*">
+  <group name="_">
+  {{ name | re("\\S+") }} is {{ oper_state | re("up|down") }}, line protocol is {{ line_protocol | re("up|down") }}
+    Hardware is {{ hardware | PHRASE }}
+    Description: {{ description | PHRASE }}
+    MTU {{ mtu | to_int }} bytes
+    {{ speed | re("\\d+") }}Mb/s
+  </group>
+</group>
