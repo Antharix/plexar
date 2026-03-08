@@ -1,14 +1,29 @@
-# ⚡ Plexar
-
+<div align="center">
+<br/>
+<pre>
+██████╗ ██╗     ███████╗██╗  ██╗ █████╗ ██████╗
+██╔══██╗██║     ██╔════╝╚██╗██╔╝██╔══██╗██╔══██╗
+██████╔╝██║     █████╗   ╚███╔╝ ███████║██████╔╝
+██╔═══╝ ██║     ██╔══╝   ██╔██╗ ██╔══██║██╔══██╗
+██║     ███████╗███████╗██╔╝ ██╗██║  ██║██║  ██║
+╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
+</pre>
+    
 **The nervous system for your network.**
 
-[![PyPI version](https://badge.fury.io/py/plexar.svg)](https://badge.fury.io/py/plexar)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![CI](https://github.com/yourorg/plexar/actions/workflows/ci.yml/badge.svg)](https://github.com/yourorg/plexar/actions)
+*A unified, async-first Python SDK for network automation — transport, parsing, intent, telemetry, topology, and AI in one platform.*
+
+<br/>
+
+{![PyPI](https://img.shields.io/pypi/v/plexar?color=00D4FF&labelColor=0A0F1E&style=for-the-badge)]
+[![Python](https://img.shields.io/badge/python-3.11%2B-00D4FF?labelColor=0A0F1E&style=for-the-badge)](https://python.org)
+[![License](https://img.shields.io/badge/license-Apache%202.0-00D4FF?labelColor=0A0F1E&style=for-the-badge)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-plexar.dev-00D4FF?labelColor=0A0F1E&style=for-the-badge)](https://antharix.github.io/plexar/)
+[![Discord](https://img.shields.io/badge/discord-join-00D4FF?labelColor=0A0F1E&style=for-the-badge)](https://discord.gg/plexar)
+
+</div>
 
 Plexar is a production-grade Python SDK and CLI for network automation. It unifies vendor-specific APIs behind a clean, async-first interface and layers in security, AI, intent-based management, topology analysis, and change simulation — all out of the box.
-
 ```bash
 pip install plexar
 ```
