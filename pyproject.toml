@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "plexar"
-version = "0.1.0a1"
+version = "0.5.0"
 description = "The nervous system for your network — a unified, async-first Python SDK for network automation."
 readme = "README.md"
 license = { text = "Apache-2.0" }

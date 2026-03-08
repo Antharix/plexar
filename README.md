@@ -1,247 +1,123 @@
-<div align="center">
-<br/>
-<pre>
-██████╗ ██╗     ███████╗██╗  ██╗ █████╗ ██████╗
-██╔══██╗██║     ██╔════╝╚██╗██╔╝██╔══██╗██╔══██╗
-██████╔╝██║     █████╗   ╚███╔╝ ███████║██████╔╝
-██╔═══╝ ██║     ██╔══╝   ██╔██╗ ██╔══██║██╔══██╗
-██║     ███████╗███████╗██╔╝ ██╗██║  ██║██║  ██║
-╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
-</pre>
-    
+# ⚡ Plexar
+
 **The nervous system for your network.**
 
-*A unified, async-first Python SDK for network automation — transport, parsing, intent, telemetry, topology, and AI in one platform.*
+[![PyPI version](https://badge.fury.io/py/plexar.svg)](https://badge.fury.io/py/plexar)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![CI](https://github.com/yourorg/plexar/actions/workflows/ci.yml/badge.svg)](https://github.com/yourorg/plexar/actions)
 
-<br/>
-
-{![PyPI](https://img.shields.io/pypi/v/plexar?color=00D4FF&labelColor=0A0F1E&style=for-the-badge)]
-[![Python](https://img.shields.io/badge/python-3.11%2B-00D4FF?labelColor=0A0F1E&style=for-the-badge)](https://python.org)
-[![License](https://img.shields.io/badge/license-Apache%202.0-00D4FF?labelColor=0A0F1E&style=for-the-badge)](LICENSE)
-[![Docs](https://img.shields.io/badge/docs-plexar.dev-00D4FF?labelColor=0A0F1E&style=for-the-badge)](https://antharix.github.io/plexar/)
-[![Discord](https://img.shields.io/badge/discord-join-00D4FF?labelColor=0A0F1E&style=for-the-badge)](https://discord.gg/plexar)
-
-</div>
-
----
-
-## Why Plexar?
-
-The Python network automation ecosystem is fragmented across a dozen libraries — each solving one layer well, none solving the whole problem.
-
-| You need to... | Current reality |
-|---|---|
-| Connect to devices | Netmiko *or* Scrapli *or* Paramiko |
-| Parse CLI output | TextFSM *or* TTP *or* Genie (Cisco-only) |
-| Abstract vendors | NAPALM (limited drivers, no async) |
-| Orchestrate at scale | Nornir + plugins |
-| Detect config drift | Build it yourself |
-| Push with rollback | Only if using NETCONF |
-| Stream telemetry | pyGNMI (raw, unnormalized) |
-| Model topology | Doesn't exist |
-| Test network state | pyATS (Cisco-only) |
-| Get AI-assisted RCA | Doesn't exist |
-
-**Plexar collapses all of this into a single, layered, async-native SDK.**
-
----
-
-## Quickstart
+Plexar is a production-grade Python SDK and CLI for network automation. It unifies vendor-specific APIs behind a clean, async-first interface and layers in security, AI, intent-based management, topology analysis, and change simulation — all out of the box.
 
 ```bash
 pip install plexar
 ```
 
+---
+
+## What Plexar Does
+
 ```python
+import asyncio
 from plexar import Network
 
-net = Network()
-net.inventory.load("netbox", url="https://netbox.corp.com", token_env="NB_TOKEN")
+async def main():
+    net = Network()
+    net.inventory.load("yaml", path="inventory.yaml")
 
-# Connect to all leaf switches and get BGP state — concurrently
-async with net.pool(max_concurrent=50) as pool:
-    results = await pool.map(lambda d: d.get_bgp_summary(), net.devices(role="leaf"))
+    # Query every device in the fleet concurrently
+    async with net.pool() as pool:
+        results = await pool.run_on_all("show bgp summary")
 
-for device, bgp in results:
-    for peer in bgp.peers:
-        if peer.state != "established":
-            print(f"⚠️  {device.hostname} → {peer.neighbor_ip} is {peer.state}")
+    # Ask a natural language question
+    from plexar.ai import NetworkQuery
+    nq     = NetworkQuery(network=net)
+    result = await nq.ask("which leafs have BGP peers down?")
+    print(result.answer)
+
+asyncio.run(main())
+```
+
+```bash
+# Or use the CLI
+plexar --inventory inventory.yaml bgp fleet --role leaf
+plexar ask "which devices have BGP peers down?"
+plexar intent apply ./intent/bgp.yaml
 ```
 
 ---
 
-## Core Features
+## Features
 
-### 🔌 Async Transport Layer
-Connect over SSH, NETCONF, RESTCONF, gNMI, or SNMP — async throughout, with automatic fallback, connection pooling, and per-device rate limiting.
-
-```python
-device = Device(
-    hostname="spine-01",
-    platform="arista_eos",
-    transport=Transport.SSH,        # or NETCONF, GNMI, RESTCONF
-    credentials=Credentials(password_env="DEVICE_PASS")
-)
-await device.connect()
-```
-
-### 🏭 Vendor-Neutral Data Models
-Every `get_*` call returns a normalized Pydantic model — not raw text — regardless of vendor.
-
-```python
-# Same API across Cisco, Arista, Juniper, Palo Alto
-interfaces = await device.get_interfaces()
-bgp        = await device.get_bgp_summary()
-routes     = await device.get_routing_table()
-
-# Fully typed, validated, serializable
-print(bgp.peers[0].state)           # "established"
-print(interfaces[0].speed_mbps)     # 10000
-```
+### 🔌 Multi-Vendor Support
+Arista EOS, Cisco IOS/IOS-XE, Cisco NX-OS, Juniper JunOS — with a clean driver abstraction for adding more. Every driver implements the same interface.
 
 ### 🎯 Intent Engine
-Declare what you want. Plexar figures out how to get there, per vendor.
+Declare what you want. Plexar figures out the commands.
 
 ```python
-from plexar.intent import Intent
-from plexar.intent.primitives import BGPIntent, InterfaceIntent
+from plexar.intent import Intent, BGPIntent
 
-intent = Intent(devices=net.devices(role="leaf"))
-intent.ensure(BGPIntent(asn=65001, neighbors=["10.0.0.1"], address_family="evpn"))
-intent.ensure(InterfaceIntent(name="Ethernet1", mtu=9214, admin_state="up"))
-
-plan = await intent.compile()
-print(plan.diff())           # see exactly what will change, per device
-
-result = await intent.apply()
-report = await intent.verify()
-print(report.compliant)      # True
+intent = Intent(devices=leafs)
+intent.ensure(BGPIntent(asn=65001, neighbors=[
+    BGPNeighbor(ip="10.0.0.1", remote_as=65000, description="spine-01"),
+]))
+await intent.apply()
 ```
 
-### 🔄 Transactional Config Push
-Every push is a transaction. Automatic rollback on verification failure.
+### 🧠 AI Features
+- **AI Parser**: LLM-powered fallback for unknown vendors or unparseable output
+- **RCA Engine**: Root cause analysis with automated remediation suggestions
+- **Natural Language Query**: Ask questions in plain English, get fleet-wide answers
+
+### 🔐 Security-First
+Every operation is sanitized, audited, and access-controlled. The security layer is automatic — no opt-in required.
+
+- Input sanitization: command injection, prompt injection, SSTI, path traversal
+- Append-only audit trail with SIEM/Splunk export
+- RBAC: VIEWER → OPERATOR → ENGINEER → ADMIN → SUPERADMIN
+- Multi-backend secrets: HashiCorp Vault, OS keyring, environment variables
+- TLS/SSH policy enforcement
+
+### 🗺️ Topology Engine
+Discover your network topology via LLDP/CDP. Find paths, calculate blast radius, detect single points of failure.
 
 ```python
-async with device.transaction() as txn:
-    await txn.push(new_config)
-    ok = await txn.verify([
-        ("bgp_peers_up", lambda r: r.peers_established >= 4),
-    ])
-    if not ok:
-        await txn.rollback()    # guaranteed, across all transports
+from plexar.topology import TopologyGraph
+
+topo  = TopologyGraph()
+await topo.discover(inventory)
+blast = topo.blast_radius("spine-01")
+path  = topo.shortest_path("server-01", "firewall-01")
 ```
 
-### 📡 Drift Detection
-Continuously compare running state against desired state. Get alerted. Auto-remediate.
+### 👯 Digital Twin
+Simulate changes before you push them to production.
 
 ```python
-monitor = DriftMonitor(inventory=net.inventory, interval_seconds=300)
+from plexar.twin import DigitalTwin
 
-@monitor.on_drift
-async def handle_drift(event):
-    await alert_slack(f"Drift on {event.device}: {event.summary}")
-    await event.remediate()     # optional: auto-fix
-
-await monitor.start()
+twin   = DigitalTwin()
+await twin.capture(network=net)
+result = twin.simulate_interface_failure("leaf-01", "Ethernet1")
+print(f"Risk score: {result.risk_score}/100")
+print(result.impact_summary())
 ```
 
-### 🌐 Topology Engine
-Understand your network as a graph. Discover via LLDP/CDP. Compute blast radius.
+### 📡 Streaming Telemetry
+Subscribe to gNMI streams and react to events with an async pub/sub event bus.
 
-```python
-topo = TopologyEngine(net.inventory)
-await topo.discover()
+### 📊 Reporting
+HTML, JSON, and text reports for compliance checks, change operations, and inventory.
 
-path   = topo.shortest_path("leaf-01", "spine-02")
-blast  = topo.blast_radius("core-sw-01")   # what breaks if this dies?
+### 🔌 Plugin SDK
+Extend Plexar with custom drivers, inventory sources, validators, and more — published as ordinary Python packages.
 
-topo.export_d3("topology.html")            # interactive browser visualization
-```
-
-### 🤖 AI Engine
-Natural language RCA. Autonomous remediation. LLM-assisted parsing for unknown output.
-
-```python
-ai = NetworkAI(net)
-
-# Ask in plain English
-rca = await ai.ask("Why is traffic slow between dc1 and dc2?")
-print(rca.root_cause)           # "BGP prefix limit reached on leaf-03"
-print(rca.affected_devices)     # ["leaf-03", "spine-01"]
-
-# Parse unknown CLI output — no template required
-raw    = await device.run("show platform qos queue-stats")
-parsed = await ai.parse(raw, hint="QoS queue statistics")
-```
-
-### 🧪 Network Testing Framework
-pytest-native. Mock driver for CI/CD. No real devices needed in your pipeline.
-
-```python
-@pytest.mark.asyncio
-async def test_all_bgp_peers_established(net):
-    async for device in net.devices(role="leaf"):
-        bgp = await device.get_bgp_summary()
-        assert all(p.state == "established" for p in bgp.peers)
-
-async def test_no_config_drift(net):
-    report = await net.drift_report()
-    assert report.is_clean, report.summary()
-```
-
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────┐
-│                     USER API                        │
-├─────────────────────────────────────────────────────┤
-│               AI ENGINE  ·  INTENT ENGINE           │
-├─────────────────────────────────────────────────────┤
-│          STATE MANAGER  ·  TOPOLOGY ENGINE          │
-├─────────────────────────────────────────────────────┤
-│              DEVICE ABSTRACTION LAYER               │
-├─────────────────────────────────────────────────────┤
-│     SSH  ·  NETCONF  ·  RESTCONF  ·  gNMI  ·  SNMP  │
-├─────────────────────────────────────────────────────┤
-│   Cisco  ·  Juniper  ·  Arista  ·  Palo Alto  · …   │
-└─────────────────────────────────────────────────────┘
-```
-
----
-
-## Supported Platforms
-
-| Vendor | SSH | NETCONF | RESTCONF | gNMI |
-|---|:---:|:---:|:---:|:---:|
-| Cisco IOS / IOS-XE | ✅ | ✅ | ✅ | ⚡ |
-| Cisco NX-OS | ✅ | ✅ | ✅ | ⚡ |
-| Cisco IOS-XR | ✅ | ✅ | ✅ | ✅ |
-| Arista EOS | ✅ | ✅ | ✅ | ✅ |
-| Juniper JunOS | ✅ | ✅ | ⚡ | ⚡ |
-| Palo Alto PAN-OS | ✅ | ✅ | ✅ | — |
-| Fortinet FortiOS | ✅ | ⚡ | ✅ | — |
-| Nokia SR-OS | ⚡ | ✅ | ⚡ | ✅ |
-
-✅ Stable · ⚡ In Progress · — Roadmap
-
----
-
-## Compared to the Ecosystem
-
-| Capability | Netmiko | NAPALM | Nornir | pyATS | **Plexar** |
-|---|:---:|:---:|:---:|:---:|:---:|
-| Async-native | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Vendor-neutral models | ❌ | ⚠️ | ❌ | ⚠️ | ✅ |
-| Intent engine | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Drift detection | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Transactional push | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Streaming telemetry | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Topology graph | ❌ | ❌ | ❌ | ❌ | ✅ |
-| AI-assisted RCA | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Mock driver / CI-CD | ❌ | ❌ | ⚠️ | ✅ | ✅ |
-| Multi-vendor testing | ❌ | ❌ | ❌ | ❌ | ✅ |
+### 🔗 Integrations
+- **NetBox** — use as inventory source or sync device changes
+- **Nautobot** — GraphQL-native integration
+- **OpenTelemetry** — export all Plexar metrics to your observability stack
+- **HashiCorp Vault** — secrets backend
 
 ---
 
@@ -251,76 +127,161 @@ async def test_no_config_drift(net):
 # Core
 pip install plexar
 
-# With AI engine
+# With AI features (requires OPENAI_API_KEY or ANTHROPIC_API_KEY)
 pip install plexar[ai]
 
-# With gNMI telemetry
+# With gNMI streaming
 pip install plexar[gnmi]
+
+# With NETCONF
+pip install plexar[netconf]
+
+# With NetBox integration
+pip install plexar[netbox]
+
+# With Nautobot integration
+pip install plexar[nautobot]
+
+# With OpenTelemetry export
+pip install plexar[telemetry]
+
+# With HashiCorp Vault
+pip install plexar[vault]
 
 # Everything
 pip install plexar[all]
 ```
 
-**Requires Python 3.11+**
+---
+
+## Quick Start
+
+**1. Create your inventory:**
+
+```yaml
+# inventory.yaml
+devices:
+  - hostname: spine-01
+    management_ip: 192.168.1.1
+    platform: arista_eos
+    credentials:
+      username: admin
+      password_env: NET_PASSWORD
+    metadata:
+      role: spine
+      site: dc1
+
+  - hostname: leaf-01
+    management_ip: 192.168.1.10
+    platform: arista_eos
+    credentials:
+      username: admin
+      password_env: NET_PASSWORD
+    metadata:
+      role: leaf
+      site: dc1
+```
+
+**2. Connect and query:**
+
+```python
+import asyncio
+from plexar import Network
+
+async def main():
+    net = Network()
+    net.inventory.load("yaml", path="inventory.yaml")
+
+    device = net.inventory.get("spine-01")
+    async with device:
+        bgp        = await device.get_bgp_summary()
+        interfaces = await device.get_interfaces()
+
+    print(f"BGP peers established: {bgp.peers_established}")
+    print(f"Interfaces up: {sum(1 for i in interfaces if i.oper_state == 'up')}")
+
+asyncio.run(main())
+```
+
+**3. Or use the CLI:**
+
+```bash
+export NET_PASSWORD=secret
+plexar --inventory inventory.yaml devices list
+plexar --inventory inventory.yaml bgp show spine-01
+plexar --inventory inventory.yaml bgp fleet
+```
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                     USER API / CLI                      │
+├───────────────────┬─────────────────────────────────────┤
+│   AI ENGINE       │   INTENT ENGINE                     │
+│   • AI Parser     │   • Primitives (BGP, VLAN, Route…)  │
+│   • RCA Engine    │   • 4-vendor compiler               │
+│   • NL Query      │   • Plan / Apply / Verify           │
+├───────────────────┴──────────────┬──────────────────────┤
+│   STATE MANAGER                  │   TOPOLOGY ENGINE    │
+│   • Snapshots                    │   • LLDP/CDP         │
+│   • Drift Monitor                │   • Graph analysis   │
+│   • Digital Twin                 │   • Blast radius     │
+├──────────────────────────────────┴──────────────────────┤
+│               DEVICE ABSTRACTION LAYER                  │
+│   • Config diff / transaction                           │
+│   • Parsers (Regex/TTP/TextFSM/JSON/XML)               │
+│   • Security (sanitize / audit / RBAC)                  │
+│   • Connection Pool                                     │
+├─────────────────────────────────────────────────────────┤
+│            TRANSPORT + VENDOR DRIVERS                   │
+│   Arista EOS │ Cisco IOS │ Cisco NX-OS │ Juniper JunOS  │
+│   SSH/Scrapli │ NETCONF/ncclient │ gNMI/grpc            │
+└─────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## Documentation
 
-Full documentation, tutorials, and API reference at **[plexar.dev](https://plexar.dev)**
+Full documentation is available at [plexar.dev](https://plexar.dev) (coming soon) or in the `docs/` directory.
 
-- [Getting Started](https://plexar.dev/docs/quickstart)
-- [Inventory Setup](https://plexar.dev/docs/inventory)
-- [Writing Intent](https://plexar.dev/docs/intent)
-- [Vendor Drivers](https://plexar.dev/docs/drivers)
-- [AI Engine](https://plexar.dev/docs/ai)
-- [Testing Guide](https://plexar.dev/docs/testing)
-
----
-
-## Contributing
-
-We welcome contributions — especially new vendor drivers.
-
-```bash
-git clone https://github.com/plexar/plexar
-cd plexar
-pip install -e ".[dev]"
-pytest
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) and the [Driver Authoring Guide](https://plexar.dev/docs/contributing/drivers).
-
----
-
-## Roadmap
-
-- [x] Core device model + async SSH
-- [x] Cisco IOS/NX-OS/XR drivers
-- [x] Arista EOS driver
-- [x] Juniper JunOS driver
-- [ ] Intent engine v1
-- [ ] Drift monitor
-- [ ] Topology engine
-- [ ] gNMI telemetry
-- [ ] AI parser + RCA
-- [ ] Digital twin / simulation
-- [ ] Web UI (enterprise)
+| Guide | Description |
+|---|---|
+| [Installation](docs/installation.md) | All installation options and extras |
+| [Quick Start](docs/quickstart.md) | Up and running in 5 minutes |
+| [Core Concepts](docs/concepts.md) | Architecture and mental model |
+| [Inventory Guide](docs/guides/inventory.md) | YAML, NetBox, Nautobot, programmatic |
+| [Device Operations](docs/guides/devices.md) | Connect, query, push config |
+| [Intent Engine](docs/guides/intent.md) | Declare-and-apply configuration management |
+| [Security](docs/guides/security.md) | Audit, RBAC, secrets, TLS |
+| [Topology](docs/guides/topology.md) | Discovery, path analysis, blast radius |
+| [AI Features](docs/guides/ai.md) | Parser, RCA, natural language query |
+| [Digital Twin](docs/guides/twin.md) | Change simulation |
+| [Telemetry](docs/guides/telemetry.md) | gNMI streaming and events |
+| [Reporting](docs/guides/reporting.md) | HTML/JSON/text reports |
+| [CLI Reference](docs/cli.md) | All commands and options |
+| [Plugin Development](docs/plugins.md) | Build and publish extensions |
+| [CI/CD Guide](docs/cicd.md) | Network-as-code pipeline |
+| [Integrations](docs/integrations.md) | NetBox, Nautobot, OpenTelemetry, Vault |
 
 ---
 
 ## License
 
-Apache 2.0 — see [LICENSE](LICENSE)
+Apache 2.0 — free for commercial and open-source use.
 
 ---
 
-<div align="center">
+## Contributing
 
-Built with obsession by the Plexar team and contributors.
+PRs welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-**[plexar.dev](https://plexar.dev) · [Discord](https://discord.gg/plexar) · [Twitter](https://twitter.com/plexar_dev)**
-
-*The nervous system for your network.*
-
-</div>
+```bash
+git clone https://github.com/yourorg/plexar
+cd plexar
+pip install -e ".[all,dev]"
+pytest
+```
