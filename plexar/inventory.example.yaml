@@ -1,0 +1,58 @@
+# Plexar Inventory File
+# Place this in your project directory and load with:
+#   net.inventory.load("yaml", path="./inventory.yaml")
+
+defaults:
+  transport: ssh
+  credentials:
+    username: admin
+    password_env: PLEXAR_DEVICE_PASSWORD   # set this in your environment
+
+devices:
+  - hostname: spine-01
+    management_ip: 10.0.0.1
+    platform: arista_eos
+    tags: [spine, dc1]
+    metadata:
+      role: spine
+      site: dc1
+      rack: A1
+
+  - hostname: spine-02
+    management_ip: 10.0.0.2
+    platform: arista_eos
+    tags: [spine, dc1]
+    metadata:
+      role: spine
+      site: dc1
+      rack: A2
+
+  - hostname: leaf-01
+    management_ip: 10.0.1.1
+    platform: cisco_nxos
+    tags: [leaf, dc1]
+    metadata:
+      role: leaf
+      site: dc1
+      rack: B1
+
+  - hostname: leaf-02
+    management_ip: 10.0.1.2
+    platform: cisco_nxos
+    tags: [leaf, dc1]
+    metadata:
+      role: leaf
+      site: dc1
+      rack: B2
+
+  - hostname: fw-01
+    management_ip: 10.0.2.1
+    platform: paloalto_panos
+    transport: restconf
+    tags: [firewall, dc1]
+    metadata:
+      role: firewall
+      site: dc1
+    credentials:
+      username: apiuser
+      password_env: FW_API_PASSWORD       # separate credentials for firewalls

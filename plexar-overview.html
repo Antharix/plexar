@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plexar v0.5.0 — Architecture, Deployment & How It Works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:      #0b0f14;
+  --ink2:     #111820;
+  --ink3:     #181f2a;
+  --panel:    #1a2236;
+  --panel2:   #1f2b40;
+  --rule:     #243349;
+  --rule2:    #2e4166;
+  --cyan:     #00e5ff;
+  --cyan2:    #00b8cc;
+  --green:    #00f59b;
+  --amber:    #ffc107;
+  --red:      #ff4b4b;
+  --purple:   #b388ff;
+  --text:     #c5d8f0;
+  --text2:    #7a9bbe;
+  --text3:    #3d5a7a;
+  --white:    #e8f3ff;
+  --mono:     'IBM Plex Mono', monospace;
+  --sans:     'IBM Plex Sans', sans-serif;
+  --display:  'Bebas Neue', sans-serif;
+  --col:      860px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--ink);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 99;
+  background: rgba(11,15,20,0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule);
+  display: flex; align-items: center;
+  padding: 0 2rem;
+  height: 52px;
+  gap: 2rem;
+}
+.nav-logo {
+  font-family: var(--display);
+  font-size: 1.6rem;
+  color: var(--cyan);
+  letter-spacing: 0.05em;
+  margin-right: auto;
+}
+nav a {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text3);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s;
+  letter-spacing: 0.05em;
+}
+nav a:hover { color: var(--cyan); }
+
+/* ── LAYOUT ── */
+.page { max-width: var(--col); margin: 0 auto; padding: 0 2rem 8rem; }
+
+/* ── HERO ── */
+.hero {
+  padding: 5rem 0 4rem;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 800px 400px at -100px -50px, rgba(0,229,255,0.06) 0%, transparent 60%),
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,229,255,0.03) 39px, rgba(0,229,255,0.03) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,229,255,0.03) 39px, rgba(0,229,255,0.03) 40px);
+}
+.hero-label {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--cyan);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.hero h1 {
+  font-family: var(--display);
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  color: var(--white);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.5rem;
+}
+.hero h1 span { color: var(--cyan); }
+.hero-sub {
+  font-family: var(--sans);
+  font-size: 1.1rem;
+  color: var(--text2);
+  font-weight: 300;
+  margin-bottom: 2rem;
+  max-width: 560px;
+}
+.hero-stats {
+  display: flex; gap: 2rem; flex-wrap: wrap;
+}
+.stat {
+  text-align: center;
+}
+.stat-num {
+  display: block;
+  font-family: var(--display);
+  font-size: 2rem;
+  color: var(--cyan);
+  letter-spacing: 0.05em;
+}
+.stat-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ── SECTIONS ── */
+section {
+  padding: 4rem 0 0;
+}
+.section-num {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--cyan);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+h2 {
+  font-family: var(--display);
+  font-size: 2.8rem;
+  color: var(--white);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  margin-bottom: 1.5rem;
+}
+h3 {
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--white);
+  margin: 2rem 0 0.5rem;
+  letter-spacing: 0.02em;
+}
+h4 {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 1.5rem 0 0.5rem;
+}
+p { margin-bottom: 1rem; color: var(--text); }
+strong { color: var(--white); font-weight: 600; }
+a { color: var(--cyan); text-decoration: none; }
+
+/* ── CODE ── */
+pre {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--cyan);
+  border-radius: 6px;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+pre code {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--text);
+  line-height: 1.7;
+}
+code {
+  font-family: var(--mono);
+  font-size: 0.82em;
+  color: var(--cyan);
+  background: rgba(0,229,255,0.07);
+  padding: 0.1em 0.4em;
+  border-radius: 3px;
+}
+pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+
+.k  { color: #80b4ff; }
+.s  { color: #a3d977; }
+.c  { color: var(--text3); font-style: italic; }
+.f  { color: var(--cyan); }
+.n  { color: var(--amber); }
+.t  { color: var(--purple); }
+
+/* ── ARCH DIAGRAM ── */
+.arch {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin: 1.5rem 0;
+}
+.arch-row {
+  display: flex;
+  gap: 0;
+  margin: 4px 0;
+}
+.arch-layer {
+  flex: 1;
+  border: 1px solid var(--rule2);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  background: var(--panel);
+  color: var(--text2);
+  font-size: 0.72rem;
+  text-align: center;
+}
+.arch-layer + .arch-layer { margin-left: 6px; }
+.arch-layer.L1 { border-color: var(--cyan);   color: var(--cyan);   background: rgba(0,229,255,0.05); }
+.arch-layer.L2 { border-color: var(--purple);  color: var(--purple); background: rgba(179,136,255,0.05); }
+.arch-layer.L3 { border-color: var(--green);   color: var(--green);  background: rgba(0,245,155,0.05); }
+.arch-layer.L4 { border-color: var(--amber);   color: var(--amber);  background: rgba(255,193,7,0.05); }
+.arch-layer.L5 { border-color: var(--red);     color: var(--red);    background: rgba(255,75,75,0.05); }
+.arch-label {
+  font-size: 0.6rem;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 0.75rem 0 0.2rem;
+}
+.arch-arrow {
+  text-align: center;
+  color: var(--text3);
+  font-size: 0.8rem;
+  margin: 2px 0;
+}
+
+/* ── TABLES ── */
+.table-wrap { overflow-x: auto; margin: 1rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text3);
+  text-align: left;
+  padding: 0.5rem 1rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--rule2);
+}
+td {
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid var(--rule);
+  color: var(--text);
+  vertical-align: top;
+}
+td:first-child { font-family: var(--mono); font-size: 0.78rem; color: var(--cyan); }
+tr:hover td { background: rgba(255,255,255,0.015); }
+
+/* ── CALLOUTS ── */
+.box {
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  display: flex;
+  gap: 0.75rem;
+}
+.box-icon { flex-shrink: 0; font-size: 1rem; }
+.box-body { flex: 1; }
+.box-body strong { display: block; margin-bottom: 0.2rem; font-size: 0.82rem; font-family: var(--mono); letter-spacing: 0.05em; text-transform: uppercase; }
+.tip  { background: rgba(0,245,155,0.05);  border: 1px solid rgba(0,245,155,0.2);  }
+.tip  .box-body strong { color: var(--green); }
+.warn { background: rgba(255,193,7,0.05);   border: 1px solid rgba(255,193,7,0.25);  }
+.warn .box-body strong { color: var(--amber); }
+.info { background: rgba(0,229,255,0.05);   border: 1px solid rgba(0,229,255,0.2);  }
+.info .box-body strong { color: var(--cyan); }
+
+/* ── STEPS ── */
+.steps { margin: 1.5rem 0; counter-reset: step; }
+.step {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 0 1.25rem;
+  margin-bottom: 2rem;
+  counter-increment: step;
+}
+.step-n {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--cyan);
+  background: rgba(0,229,255,0.08);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--cyan);
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+.step-body h3 { margin-top: 0; }
+.step-body p  { font-size: 0.88rem; color: var(--text2); margin-bottom: 0.5rem; }
+
+/* ── FILE TREE ── */
+.tree {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  line-height: 1.8;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 1.25rem 1.5rem;
+  margin: 1rem 0;
+  color: var(--text2);
+}
+.tree .dir  { color: var(--cyan); }
+.tree .file { color: var(--text2); }
+.tree .note { color: var(--text3); }
+.tree .hl   { color: var(--green); }
+
+/* ── FLOW DIAGRAM ── */
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1.25rem 0;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+}
+.flow-box {
+  background: var(--panel2);
+  border: 1px solid var(--rule2);
+  border-radius: 5px;
+  padding: 0.4rem 0.8rem;
+  color: var(--text);
+  white-space: nowrap;
+}
+.flow-box.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.06); }
+.flow-box.green  { border-color: var(--green); color: var(--green); background: rgba(0,245,155,0.06); }
+.flow-box.amber  { border-color: var(--amber); color: var(--amber); background: rgba(255,193,7,0.06); }
+.flow-arrow { color: var(--text3); font-size: 1rem; }
+
+/* ── GRID ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin: 1rem 0; }
+.card {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 1.1rem;
+  transition: border-color 0.15s;
+}
+.card:hover { border-color: var(--rule2); }
+.card-icon { font-size: 1.3rem; margin-bottom: 0.5rem; }
+.card h4   { color: var(--white); font-family: var(--sans); font-weight: 700; font-size: 0.88rem; text-transform: none; letter-spacing: 0; margin: 0 0 0.3rem; }
+.card p    { font-size: 0.8rem; color: var(--text2); margin: 0; }
+
+/* ── DIVIDER ── */
+hr { border: none; border-top: 1px solid var(--rule); margin: 3rem 0; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  nav a { display: none; }
+  nav a:first-of-type { display: block; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">⚡ PLEXAR</div>
+  <a href="#architecture">Architecture</a>
+  <a href="#how-it-works">How It Works</a>
+  <a href="#deploy">Deploy</a>
+  <a href="#use">Use</a>
+  <a href="#platform">v2 Platform</a>
+</nav>
+
+<div class="page">
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-label">v0.5.0 — Release Overview</div>
+  <h1>PLEXAR<br><span>NETWORK</span><br>AUTOMATION</h1>
+  <p class="hero-sub">The nervous system for your network. A unified, async-first Python SDK and CLI for multi-vendor network automation — with AI, security, topology, and intent-based management built in.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num">16,589</span><span class="stat-label">Lines of Code</span></div>
+    <div class="stat"><span class="stat-num">75</span><span class="stat-label">Source Files</span></div>
+    <div class="stat"><span class="stat-num">28</span><span class="stat-label">Test Files</span></div>
+    <div class="stat"><span class="stat-num">4</span><span class="stat-label">Vendors</span></div>
+    <div class="stat"><span class="stat-num">9</span><span class="stat-label">Intent Types</span></div>
+    <div class="stat"><span class="stat-num">5</span><span class="stat-num">Build Phases</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ ARCHITECTURE ═══════════════════ -->
+<section id="architecture">
+  <div class="section-num">01 — Architecture</div>
+  <h2>HOW IT'S BUILT</h2>
+  <p>Plexar is a <strong>layered platform SDK</strong>. Each layer has a single responsibility and communicates with adjacent layers through clean interfaces. No layer reaches past its neighbor.</p>
+
+  <div class="arch">
+    <div class="arch-label">Layer 1 — User Interface</div>
+    <div class="arch-row">
+      <div class="arch-layer L1">Python SDK  (from plexar import Network)</div>
+      <div class="arch-layer L1">CLI  (plexar intent apply)</div>
+    </div>
+
+    <div class="arch-arrow">↓</div>
+
+    <div class="arch-label">Layer 2 — Intelligence</div>
+    <div class="arch-row">
+      <div class="arch-layer L2">AI Engine · Parser · RCA · Natural Language Query</div>
+      <div class="arch-layer L2">Intent Engine · Primitives · Compiler · Plan/Apply/Verify</div>
+    </div>
+
+    <div class="arch-arrow">↓</div>
+
+    <div class="arch-label">Layer 3 — State & Topology</div>
+    <div class="arch-row">
+      <div class="arch-layer L3">State Manager · Snapshots · Drift Monitor</div>
+      <div class="arch-layer L3">Topology Engine · LLDP/CDP · Graph · Blast Radius</div>
+      <div class="arch-layer L3">Digital Twin · Change Simulation</div>
+    </div>
+
+    <div class="arch-arrow">↓</div>
+
+    <div class="arch-label">Layer 4 — Device Abstraction</div>
+    <div class="arch-row">
+      <div class="arch-layer L4">Config · Diff · Transaction · Validator</div>
+      <div class="arch-layer L4">Security · Sanitizer · RBAC · Audit · Secrets · TLS</div>
+      <div class="arch-layer L4">Parsers · Regex · TTP · TextFSM · JSON · XML</div>
+      <div class="arch-layer L4">Connection Pool · Retry</div>
+    </div>
+
+    <div class="arch-arrow">↓</div>
+
+    <div class="arch-label">Layer 5 — Vendor Drivers & Transport</div>
+    <div class="arch-row">
+      <div class="arch-layer L5">Arista EOS</div>
+      <div class="arch-layer L5">Cisco IOS/IOS-XE</div>
+      <div class="arch-layer L5">Cisco NX-OS</div>
+      <div class="arch-layer L5">Juniper JunOS</div>
+    </div>
+    <div class="arch-row" style="margin-top:6px">
+      <div class="arch-layer" style="border-style:dashed">SSH / Scrapli</div>
+      <div class="arch-layer" style="border-style:dashed">NETCONF / ncclient</div>
+      <div class="arch-layer" style="border-style:dashed">gNMI / grpc</div>
+      <div class="arch-layer" style="border-style:dashed">SNMP (reserved)</div>
+    </div>
+  </div>
+
+  <h3>Directory Structure</h3>
+  <div class="tree">
+<span class="dir">plexar/</span>
+├── <span class="dir">plexar/</span>                         <span class="note">← Python package</span>
+│   ├── <span class="dir">core/</span>                       <span class="note">← Network, Device, Inventory, Pool, Credentials</span>
+│   ├── <span class="dir">vendors/</span>                    <span class="note">← Vendor driver implementations</span>
+│   │   ├── <span class="dir">arista/</span>   <span class="hl">eos.py</span>
+│   │   ├── <span class="dir">cisco/</span>    <span class="hl">ios.py  nxos.py</span>
+│   │   └── <span class="dir">juniper/</span>  <span class="hl">junos.py</span>
+│   ├── <span class="dir">drivers/</span>                    <span class="note">← BaseDriver ABC + DriverRegistry + MockDriver</span>
+│   ├── <span class="dir">models/</span>                     <span class="note">← Pydantic data models (BGP, Interface, Route, Platform)</span>
+│   ├── <span class="dir">intent/</span>                     <span class="note">← Intent engine: primitives, compiler, engine, verifier</span>
+│   ├── <span class="dir">config/</span>                     <span class="note">← Config diff, transaction, validators</span>
+│   ├── <span class="dir">state/</span>                      <span class="note">← Snapshots, drift monitor</span>
+│   ├── <span class="dir">topology/</span>                   <span class="note">← NetworkX graph, LLDP/CDP discovery</span>
+│   ├── <span class="dir">security/</span>                   <span class="note">← Sanitizer, audit, RBAC, secrets, TLS</span>
+│   ├── <span class="dir">ai/</span>                         <span class="note">← AIParser, RCAEngine, NetworkQuery</span>
+│   ├── <span class="dir">twin/</span>                       <span class="note">← DigitalTwin simulator</span>
+│   ├── <span class="dir">telemetry/</span>                  <span class="note">← Event bus, gNMI streaming</span>
+│   ├── <span class="dir">parsers/</span>                    <span class="note">← Regex, TTP, TextFSM, JSON, XML</span>
+│   ├── <span class="dir">plugins/</span>                    <span class="note">← Plugin SDK + PluginRegistry</span>
+│   ├── <span class="dir">reporting/</span>                  <span class="note">← HTML/JSON/text report engine</span>
+│   ├── <span class="dir">integrations/</span>               <span class="note">← NetBox, Nautobot, OpenTelemetry</span>
+│   ├── <span class="dir">discovery/</span>                  <span class="note">← Reserved: SNMP sweep (puresnmp)</span>
+│   ├── <span class="dir">cli/</span>                        <span class="note">← Click CLI — plexar command</span>
+│   └── <span class="dir">utils/</span>                      <span class="note">← Retry, helpers</span>
+├── <span class="dir">tests/</span>                          <span class="note">← 28 test files</span>
+├── <span class="dir">.github/workflows/</span>             <span class="note">← CI/CD + network pipeline</span>
+├── <span class="file">pyproject.toml</span>                  <span class="note">← Dependencies, extras, entry points</span>
+└── <span class="file">inventory.example.yaml</span>
+  </div>
+
+  <h3>Key Design Decisions</h3>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <h4>Async-first, always</h4>
+      <p>Every driver, every operation, every I/O call is <code>async/await</code>. Running 100 devices concurrently is as natural as running 1.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔌</div>
+      <h4>Driver abstraction</h4>
+      <p>All vendors implement <code>BaseDriver</code>. Application code never references a specific vendor — only <code>device.get_bgp_summary()</code>.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔐</div>
+      <h4>Security is automatic</h4>
+      <p>Sanitization, auditing, and RBAC run in the execution path, not as opt-in decorators. You cannot accidentally bypass them.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🧩</div>
+      <h4>Platform-ready seams</h4>
+      <p>OperationRunner, StateStore, AuditSink, EventBus are all ABCs. The tool uses local defaults. The future platform swaps them without touching application code.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <h4>Optional extras</h4>
+      <p>Core installs in seconds. AI, gNMI, topology, vault — each is a separate <code>pip install plexar[extra]</code>. Use only what you need.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔌</div>
+      <h4>Plugin ecosystem</h4>
+      <p>Third parties publish plugins as ordinary Python packages with entry points. Install the package; Plexar auto-discovers it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ HOW IT WORKS ═══════════════════ -->
+<section id="how-it-works">
+  <div class="section-num">02 — How It Works</div>
+  <h2>INSIDE PLEXAR</h2>
+
+  <h3>A request's journey — <code>device.get_bgp_summary()</code></h3>
+  <p>Tracing a single call from user code to device and back:</p>
+
+  <div class="flow">
+    <div class="flow-box active">user: await device.get_bgp_summary()</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">RBAC check</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">Sanitize hostname</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">DriverRegistry.get(platform)</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box amber">SSH connect (if not open)</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">run "show bgp summary | json"</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">parse JSON → BGPSummary</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">Audit log: COMMAND_EXECUTE</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box green">return BGPSummary</div>
+  </div>
+
+  <pre><code><span class="c"># What the user writes</span>
+<span class="k">async with</span> device:
+    bgp = <span class="k">await</span> device.<span class="f">get_bgp_summary</span>()
+    print(bgp.peers_established)
+
+<span class="c"># What happens internally — all automatic:</span>
+<span class="c"># 1. RBAC: is current context role >= VIEWER?</span>
+<span class="c"># 2. Sanitize: is device.hostname safe?</span>
+<span class="c"># 3. DriverRegistry: platform="arista_eos" → AristaEOSDriver</span>
+<span class="c"># 4. Scrapli: SSH to management_ip:22</span>
+<span class="c"># 5. Run: "show bgp summary | json"</span>
+<span class="c"># 6. Parse: JSON → BGPSummary(Pydantic model)</span>
+<span class="c"># 7. Audit: {event: COMMAND_EXECUTE, hostname: ..., success: true}</span>
+<span class="c"># 8. Return typed BGPSummary object</span>
+</code></pre>
+
+  <h3>The Intent Engine</h3>
+  <p>Intent-based networking separates <em>what you want</em> from <em>how to configure it</em>. You write vendor-neutral primitives. Plexar compiles them to each vendor's CLI.</p>
+
+  <div class="flow">
+    <div class="flow-box active">BGPIntent(asn=65001)</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">IntentCompiler</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">per-vendor config text</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">device.transaction()</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">push → verify</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box green">commit or rollback</div>
+  </div>
+
+  <pre><code><span class="c"># Arista EOS output:</span>
+router bgp <span class="n">65001</span>
+  neighbor <span class="n">10.0.0.1</span> remote-as <span class="n">65000</span>
+  neighbor <span class="n">10.0.0.1</span> description spine-01
+
+<span class="c"># Cisco IOS output (same primitive):</span>
+router bgp <span class="n">65001</span>
+ neighbor <span class="n">10.0.0.1</span> remote-as <span class="n">65000</span>
+ neighbor <span class="n">10.0.0.1</span> description spine-01
+
+<span class="c"># Juniper JunOS output (same primitive):</span>
+set protocols bgp group UNDERLAY neighbor <span class="n">10.0.0.1</span> peer-as <span class="n">65000</span>
+set protocols bgp group UNDERLAY description spine-01</code></pre>
+
+  <h3>The Security Layer</h3>
+  <p>Every operation passes through five security controls automatically:</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Control</th><th>What it does</th><th>Where it runs</th></tr></thead>
+    <tbody>
+      <tr><td>Sanitizer</td><td>Blocks command injection, prompt injection, SSTI, path traversal, output overflow</td><td>Before every device call and AI call</td></tr>
+      <tr><td>RBAC</td><td>Checks caller role against required permission level</td><td>Entry point of every operation</td></tr>
+      <tr><td>Secrets</td><td>Fetches credentials from Vault/keyring/env — never from plaintext</td><td>At connection time</td></tr>
+      <tr><td>TLS/SSH Policy</td><td>Enforces cipher suites and host key verification</td><td>At transport setup</td></tr>
+      <tr><td>Audit Logger</td><td>Appends every event to immutable JSONL + optional SIEM sink</td><td>After every operation completes</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>The AI Engine</h3>
+  <p>Three AI-powered features, each solving a different problem:</p>
+  <div class="grid-3">
+    <div class="card">
+      <h4>AI Parser</h4>
+      <p>LLM parses raw CLI output into typed Pydantic models when the built-in regex/TextFSM parser fails. LRU cached — same output never hits the API twice.</p>
+    </div>
+    <div class="card">
+      <h4>RCA Engine</h4>
+      <p>Root cause analysis. Given a network event, gathers live device context, topology, and drift data, then produces a structured diagnosis with remediation steps.</p>
+    </div>
+    <div class="card">
+      <h4>NL Query</h4>
+      <p>Natural language questions about the fleet. "Which leafs have BGP peers down?" → plan → concurrent device queries → LLM synthesizes an answer.</p>
+    </div>
+  </div>
+
+  <h3>The Digital Twin</h3>
+  <p>Capture a live snapshot of your network's state, then simulate failures before touching production:</p>
+  <pre><code><span class="k">await</span> twin.<span class="f">capture</span>(network=net)
+
+result = twin.<span class="f">simulate_interface_failure</span>(<span class="s">"leaf-01"</span>, <span class="s">"Ethernet1"</span>)
+<span class="c"># → risk_score: 72/100</span>
+<span class="c"># → affected_devices: ["leaf-01", "server-rack-3"]</span>
+<span class="c"># → warnings: ["leaf-01 has no redundant uplink on this segment"]</span>
+
+result = twin.<span class="f">validate_intent</span>(intent)
+<span class="c"># → passed: True  (safe to apply)</span>
+<span class="c"># OR</span>
+<span class="c"># → conflicts: ["BGP ASN 65001 already configured on spine-01"]</span>
+</code></pre>
+
+  <h3>The Plugin System</h3>
+  <p>Third parties extend Plexar by declaring an entry point. No code changes to Plexar required:</p>
+  <pre><code><span class="c"># In third-party pyproject.toml:</span>
+[project.entry-points.<span class="s">"plexar.plugins"</span>]
+aruba_cx = <span class="s">"plexar_aruba.plugin:ArubaOSCXPlugin"</span>
+
+<span class="c"># After pip install plexar-aruba:</span>
+<span class="c"># DriverRegistry automatically has "aruba_cx" → ArubaOSCXDriver</span>
+<span class="c"># inventory.yaml platform: aruba_cx  just works</span>
+</code></pre>
+</section>
+
+<!-- ═══════════════════ DEPLOY ═══════════════════ -->
+<section id="deploy">
+  <div class="section-num">03 — Deployment</div>
+  <h2>HOW TO DEPLOY</h2>
+  <p>Plexar v1 is a tool — it runs wherever Python runs. There is no server to operate, no database to manage, no daemon to keep alive. Pick the scenario that matches your environment.</p>
+
+  <h3>Prerequisites</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Requirement</th><th>Minimum</th><th>Recommended</th></tr></thead>
+    <tbody>
+      <tr><td>Python</td><td>3.10</td><td>3.11 or 3.12</td></tr>
+      <tr><td>OS</td><td>Linux, macOS, Windows (WSL2)</td><td>Ubuntu 22.04 LTS</td></tr>
+      <tr><td>RAM</td><td>256 MB</td><td>1 GB (4 GB if using local AI)</td></tr>
+      <tr><td>Disk</td><td>100 MB</td><td>5 GB (if using local AI model)</td></tr>
+      <tr><td>Network</td><td>SSH access to devices</td><td>Dedicated management network</td></tr>
+      <tr><td>Python access</td><td>pip</td><td>uv (10× faster installs)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <hr>
+
+  <h3>Scenario A — Developer Laptop</h3>
+  <p>The fastest path. Run Plexar from your laptop against a lab or staging network.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-n">1</div>
+      <div class="step-body">
+        <h3>Install Python 3.11+</h3>
+        <pre><code><span class="c"># macOS</span>
+brew install python@3.11
+
+<span class="c"># Ubuntu / Debian</span>
+sudo apt update && sudo apt install python3.11 python3.11-venv python3-pip
+
+<span class="c"># Verify</span>
+python3 --version</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">2</div>
+      <div class="step-body">
+        <h3>Create a virtual environment and install Plexar</h3>
+        <pre><code><span class="c"># Create and activate</span>
+python3.11 -m venv ~/.venvs/plexar
+source ~/.venvs/plexar/bin/activate    <span class="c"># Linux/macOS</span>
+<span class="c"># ~/.venvs/plexar/Scripts/activate    # Windows WSL2</span>
+
+<span class="c"># Install core + CLI + topology</span>
+pip install "plexar[cli,topology]"
+
+<span class="c"># Install everything</span>
+pip install "plexar[all]"
+
+<span class="c"># Verify</span>
+plexar --version</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">3</div>
+      <div class="step-body">
+        <h3>Create your inventory file</h3>
+        <pre><code><span class="c"># inventory.yaml</span>
+devices:
+  - hostname: spine-01
+    management_ip: 192.168.1.1
+    platform: arista_eos
+    credentials:
+      username: admin
+      password_env: NET_PASSWORD
+    metadata:
+      role: spine
+      site: dc1
+
+  - hostname: leaf-01
+    management_ip: 192.168.1.10
+    platform: arista_eos
+    credentials:
+      username: admin
+      password_env: NET_PASSWORD
+    metadata:
+      role: leaf
+      site: dc1</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">4</div>
+      <div class="step-body">
+        <h3>Set credentials and run</h3>
+        <pre><code>export NET_PASSWORD="your-device-password"
+
+plexar --inventory inventory.yaml devices list
+plexar --inventory inventory.yaml bgp show spine-01
+plexar --inventory inventory.yaml bgp fleet</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <h3>Scenario B — Shared Jump Host (Team Use)</h3>
+  <p>Install Plexar on a shared Linux server that has SSH access to all devices. Multiple engineers use it. Recommended for teams of 2–20.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-n">1</div>
+      <div class="step-body">
+        <h3>Provision a jump host</h3>
+        <p>A small VM is fine. 2 vCPU, 2 GB RAM, Ubuntu 22.04. It must have SSH access to your device management network.</p>
+        <pre><code><span class="c"># On the jump host</span>
+sudo apt update
+sudo apt install python3.11 python3.11-venv python3-pip git -y
+
+<span class="c"># Create a dedicated service user</span>
+sudo useradd -m -s /bin/bash plexar
+sudo su - plexar</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">2</div>
+      <div class="step-body">
+        <h3>Install Plexar system-wide for the plexar user</h3>
+        <pre><code>python3.11 -m venv ~/venv
+source ~/venv/bin/activate
+pip install "plexar[all]"
+
+<span class="c"># Create config directory</span>
+mkdir -p ~/.plexar/state ~/.plexar/snapshots
+mkdir -p ~/network/intent</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">3</div>
+      <div class="step-body">
+        <h3>Set up secrets securely</h3>
+        <pre><code><span class="c"># Option A: Environment file (simple)</span>
+cat > ~/.plexar/.env << 'EOF'
+NET_PASSWORD=your-device-password
+NET_SSH_KEY_PATH=/home/plexar/.ssh/network_key
+OPENAI_API_KEY=sk-...  # optional
+EOF
+chmod 600 ~/.plexar/.env
+
+<span class="c"># Add to ~/.bashrc</span>
+echo 'set -a; source ~/.plexar/.env; set +a' >> ~/.bashrc
+source ~/.bashrc
+
+<span class="c"># Option B: OS keyring (more secure)</span>
+pip install "plexar[keyring]"
+python3 -c "
+from plexar.security.secrets import SecretsManager, KeyringBackend
+import asyncio
+secrets = SecretsManager(backend=KeyringBackend())
+asyncio.run(secrets.set('net_password', 'your-device-password'))
+"</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">4</div>
+      <div class="step-body">
+        <h3>Put inventory and intent files under git</h3>
+        <pre><code>cd ~/network
+git init
+git remote add origin https://github.com/yourorg/network-config
+
+<span class="c"># Recommended structure</span>
+mkdir -p intent snapshots reports
+
+<span class="c"># .gitignore</span>
+cat > .gitignore << 'EOF'
+snapshots/
+reports/
+*.env
+*.key
+EOF</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">5</div>
+      <div class="step-body">
+        <h3>Create a systemd service for the drift monitor (optional)</h3>
+        <pre><code><span class="c"># /etc/systemd/system/plexar-drift.service</span>
+[Unit]
+Description=Plexar Drift Monitor
+After=network.target
+
+[Service]
+Type=simple
+User=plexar
+WorkingDirectory=/home/plexar/network
+EnvironmentFile=/home/plexar/.plexar/.env
+ExecStart=/home/plexar/venv/bin/python3 -c "
+import asyncio
+from plexar import Network
+from plexar.state.drift import DriftMonitor
+
+async def main():
+    net = Network()
+    net.inventory.load('yaml', path='inventory.yaml')
+    monitor = DriftMonitor(interval=300)
+    await monitor.start(devices=net.inventory.all())
+
+asyncio.run(main())
+"
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+        <pre><code>sudo systemctl daemon-reload
+sudo systemctl enable plexar-drift
+sudo systemctl start plexar-drift
+sudo systemctl status plexar-drift</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">6</div>
+      <div class="step-body">
+        <h3>Give team members SSH access</h3>
+        <pre><code><span class="c"># Each engineer SSHes to the jump host and uses plexar</span>
+ssh engineer@jump-host.corp.com
+
+<span class="c"># They activate the shared venv</span>
+source /home/plexar/venv/bin/activate
+
+<span class="c"># And run commands against the shared inventory</span>
+plexar --inventory ~/network/inventory.yaml bgp fleet</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <h3>Scenario C — CI/CD Pipeline (Automated)</h3>
+  <p>Run Plexar as part of a GitOps workflow. Engineers commit intent YAML files; the pipeline applies them.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-n">1</div>
+      <div class="step-body">
+        <h3>Copy the GitHub Actions workflow</h3>
+        <pre><code>mkdir -p .github/workflows
+cp plexar/.github/workflows/network-ci.yml .github/workflows/</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">2</div>
+      <div class="step-body">
+        <h3>Add GitHub Secrets</h3>
+        <p>In your repository: <strong>Settings → Secrets → Actions</strong></p>
+        <div class="table-wrap">
+        <table>
+          <thead><tr><th>Secret</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>PLEXAR_SSH_KEY</td><td>Contents of your SSH private key</td></tr>
+            <tr><td>SLACK_WEBHOOK</td><td>Slack webhook URL (optional)</td></tr>
+            <tr><td>OPENAI_API_KEY</td><td>For AI features (optional)</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">3</div>
+      <div class="step-body">
+        <h3>Create the production environment gate</h3>
+        <p><strong>Settings → Environments → New: <code>production</code></strong>. Add required reviewers. Production deploys will wait for approval before executing.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">4</div>
+      <div class="step-body">
+        <h3>Push a change and watch it run</h3>
+        <pre><code>git checkout -b change/update-leaf-bgp
+vim intent/leaf-bgp.yaml
+
+git add intent/leaf-bgp.yaml
+git commit -m "feat: add leaf-03 BGP neighbors"
+git push origin change/update-leaf-bgp
+<span class="c"># Open a PR → CI runs validate + plan + simulate + posts PR comment</span>
+<span class="c"># Merge to main → approval gate → apply + verify + compliance report</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <h3>Scenario D — Air-Gapped / No Internet</h3>
+  <p>For environments with no outbound internet access.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-n">1</div>
+      <div class="step-body">
+        <h3>Pre-download on a connected machine</h3>
+        <pre><code><span class="c"># On a connected machine, download everything</span>
+pip download "plexar[all]" -d ./plexar-packages/
+
+<span class="c"># Bundle the wheel files</span>
+tar czf plexar-packages.tar.gz plexar-packages/
+
+<span class="c"># Transfer to air-gapped machine</span>
+scp plexar-packages.tar.gz user@airgapped-host:</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">2</div>
+      <div class="step-body">
+        <h3>Install from local packages on the air-gapped machine</h3>
+        <pre><code>tar xzf plexar-packages.tar.gz
+python3.11 -m venv ~/venv
+source ~/venv/bin/activate
+pip install --no-index --find-links ./plexar-packages "plexar[all]"
+
+plexar --version  <span class="c"># works with zero internet</span></code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">3</div>
+      <div class="step-body">
+        <h3>Set up local AI (no OpenAI required)</h3>
+        <pre><code><span class="c"># Download Ollama on connected machine, transfer binary</span>
+<span class="c"># Download model weights on connected machine:</span>
+ollama pull qwen2.5-coder:7b
+<span class="c"># Copy ~/.ollama/models/ to air-gapped machine</span>
+
+<span class="c"># Configure Plexar to use local AI</span>
+export PLEXAR_AI_BACKEND=local
+export PLEXAR_AI_MODEL=qwen2.5-coder:7b
+
+<span class="c"># AI features now work with zero outbound traffic</span>
+plexar ask "which leafs have BGP peers down?"</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <h3>Install Options Summary</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Command</th><th>Installs</th><th>Use case</th></tr></thead>
+    <tbody>
+      <tr><td>pip install plexar</td><td>Core SDK + CLI</td><td>Basic use, scripts</td></tr>
+      <tr><td>pip install plexar[cli]</td><td>+ Click, Rich</td><td>Terminal use</td></tr>
+      <tr><td>pip install plexar[ai]</td><td>+ litellm, openai</td><td>AI features (API-backed)</td></tr>
+      <tr><td>pip install plexar[topology]</td><td>+ networkx</td><td>Topology analysis</td></tr>
+      <tr><td>pip install plexar[gnmi]</td><td>+ grpcio, pygnmi</td><td>Streaming telemetry</td></tr>
+      <tr><td>pip install plexar[netconf]</td><td>+ ncclient</td><td>NETCONF transport</td></tr>
+      <tr><td>pip install plexar[netbox]</td><td>+ pynetbox</td><td>NetBox inventory</td></tr>
+      <tr><td>pip install plexar[nautobot]</td><td>+ requests</td><td>Nautobot inventory</td></tr>
+      <tr><td>pip install plexar[vault]</td><td>+ hvac</td><td>HashiCorp Vault secrets</td></tr>
+      <tr><td>pip install plexar[telemetry]</td><td>+ opentelemetry</td><td>OTLP metrics export</td></tr>
+      <tr><td>pip install plexar[discovery]</td><td>+ puresnmp</td><td>SNMP sweep (coming soon)</td></tr>
+      <tr><td>pip install plexar[all]</td><td>Everything</td><td>Full installation</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ═══════════════════ USE ═══════════════════ -->
+<section id="use">
+  <div class="section-num">04 — Usage</div>
+  <h2>USING PLEXAR</h2>
+
+  <h3>The Inventory File</h3>
+  <p>Everything starts with <code>inventory.yaml</code>. This tells Plexar about your devices.</p>
+  <pre><code>devices:
+  - hostname: spine-01
+    management_ip: 192.168.1.1
+    platform: arista_eos            <span class="c"># arista_eos | cisco_ios | cisco_nxos | juniper_junos</span>
+    transport: ssh                  <span class="c"># ssh | netconf | gnmi</span>
+    port: 22
+    credentials:
+      username: admin
+      password_env: NET_PASSWORD    <span class="c"># env var name — never the actual password</span>
+      <span class="c"># OR: ssh_key_env: SSH_KEY_ENV</span>
+      <span class="c"># OR: ssh_key: /path/to/key</span>
+    metadata:
+      role: spine
+      site: dc1
+      rack: A1
+      tags: [production, bgp-core]</code></pre>
+
+  <h3>CLI Quick Reference</h3>
+  <pre><code><span class="c"># ── Devices ──────────────────────────────────────────</span>
+plexar devices list                          <span class="c"># all devices</span>
+plexar devices list --role leaf --site dc1   <span class="c"># filtered</span>
+plexar devices connect spine-01              <span class="c"># test SSH</span>
+plexar devices show spine-01                 <span class="c"># platform + BGP + interfaces</span>
+
+<span class="c"># ── BGP ──────────────────────────────────────────────</span>
+plexar bgp show spine-01                     <span class="c"># single device</span>
+plexar bgp fleet                             <span class="c"># all devices</span>
+plexar bgp fleet --role leaf                 <span class="c"># filtered</span>
+
+<span class="c"># ── Interfaces ───────────────────────────────────────</span>
+plexar interfaces show leaf-01
+plexar interfaces show leaf-01 --down-only
+
+<span class="c"># ── Intent ───────────────────────────────────────────</span>
+plexar intent plan   ./intent/bgp.yaml       <span class="c"># preview, no changes</span>
+plexar intent apply  ./intent/bgp.yaml       <span class="c"># apply (prompts)</span>
+plexar intent apply  ./intent/bgp.yaml --yes <span class="c"># apply (no prompt)</span>
+plexar intent verify ./intent/bgp.yaml       <span class="c"># verify running state</span>
+
+<span class="c"># ── Topology ─────────────────────────────────────────</span>
+plexar topology discover                     <span class="c"># LLDP walk</span>
+plexar topology path leaf-01 firewall-01     <span class="c"># shortest path</span>
+plexar topology blast spine-01               <span class="c"># blast radius</span>
+
+<span class="c"># ── Snapshots ────────────────────────────────────────</span>
+plexar snapshot capture                      <span class="c"># save all device state</span>
+plexar snapshot capture --role spine         <span class="c"># filtered</span>
+
+<span class="c"># ── Config ───────────────────────────────────────────</span>
+plexar config push spine-01 ./configs/spine-01.txt
+
+<span class="c"># ── AI ───────────────────────────────────────────────</span>
+plexar ask "which leafs have BGP peers down?"
+plexar ask "what is the total prefix count across all spines?"
+plexar rca leaf-01                           <span class="c"># root cause analysis</span>
+
+<span class="c"># ── Output formats ───────────────────────────────────</span>
+plexar --output json bgp fleet               <span class="c"># JSON output</span>
+plexar --output yaml devices list            <span class="c"># YAML output</span>
+plexar --no-color bgp fleet                  <span class="c"># no ANSI color</span></code></pre>
+
+  <h3>Python SDK Quick Reference</h3>
+  <pre><code><span class="k">import</span> asyncio
+<span class="k">from</span> plexar <span class="k">import</span> <span class="t">Network</span>
+
+<span class="k">async def</span> <span class="f">main</span>():
+    net = <span class="t">Network</span>()
+    net.inventory.load(<span class="s">"yaml"</span>, path=<span class="s">"inventory.yaml"</span>)
+
+    <span class="c"># ── Single device ─────────────────────────────────</span>
+    device = net.inventory.get(<span class="s">"spine-01"</span>)
+    <span class="k">async with</span> device:
+        bgp        = <span class="k">await</span> device.<span class="f">get_bgp_summary</span>()
+        interfaces = <span class="k">await</span> device.<span class="f">get_interfaces</span>()
+        info       = <span class="k">await</span> device.<span class="f">get_platform_info</span>()
+        routes     = <span class="k">await</span> device.<span class="f">get_routing_table</span>()
+
+    <span class="c"># ── Fleet concurrently ────────────────────────────</span>
+    leafs = net.devices(role=<span class="s">"leaf"</span>)
+    <span class="k">async with</span> net.pool(max_connections=<span class="n">20</span>) <span class="k">as</span> pool:
+        results = <span class="k">await</span> pool.<span class="f">gather</span>(<span class="k">lambda</span> d: d.<span class="f">get_bgp_summary</span>())
+
+    <span class="c"># ── Intent ────────────────────────────────────────</span>
+    <span class="k">from</span> plexar.intent <span class="k">import</span> <span class="t">Intent</span>, <span class="t">BGPIntent</span>, <span class="t">BGPNeighbor</span>
+    intent = <span class="t">Intent</span>(devices=leafs)
+    intent.ensure(<span class="t">BGPIntent</span>(asn=<span class="n">65001</span>, neighbors=[
+        <span class="t">BGPNeighbor</span>(ip=<span class="s">"10.0.0.1"</span>, remote_as=<span class="n">65000</span>)
+    ]))
+    plan   = <span class="k">await</span> intent.<span class="f">plan</span>()     <span class="c"># preview</span>
+    result = <span class="k">await</span> intent.<span class="f">apply</span>()    <span class="c"># apply</span>
+    report = <span class="k">await</span> intent.<span class="f">verify</span>()   <span class="c"># verify</span>
+
+    <span class="c"># ── Digital Twin ──────────────────────────────────</span>
+    <span class="k">from</span> plexar.twin <span class="k">import</span> <span class="t">DigitalTwin</span>
+    twin = <span class="t">DigitalTwin</span>()
+    <span class="k">await</span> twin.<span class="f">capture</span>(network=net)
+    result = twin.<span class="f">simulate_device_failure</span>(<span class="s">"spine-01"</span>)
+    print(<span class="s">f"Risk: {result.risk_score}/100"</span>)
+
+    <span class="c"># ── AI Query ──────────────────────────────────────</span>
+    <span class="k">from</span> plexar.ai <span class="k">import</span> <span class="t">NetworkQuery</span>
+    nq = <span class="t">NetworkQuery</span>(network=net)
+    r  = <span class="k">await</span> nq.<span class="f">ask</span>(<span class="s">"which leafs have BGP peers down?"</span>)
+    print(r.answer)
+
+asyncio.run(main())</code></pre>
+
+  <h3>Intent YAML Format</h3>
+  <pre><code><span class="c"># intent/leaf-baseline.yaml</span>
+devices:
+  role: leaf        <span class="c"># target devices by role</span>
+  site: dc1         <span class="c"># and/or site</span>
+
+ensure:
+  - type: bgp
+    asn: 65001
+    neighbors:
+      - ip: 10.0.0.1
+        remote_as: 65000
+        description: spine-01
+
+  - type: ntp
+    servers: [10.0.0.100, 10.0.0.101]
+
+  - type: banner
+    motd: "AUTHORIZED ACCESS ONLY"
+
+  - type: interface
+    name: Ethernet1
+    description: uplink-to-spine-01
+    admin_state: up
+    mtu: 9214</code></pre>
+
+  <div class="box tip">
+    <div class="box-icon">💡</div>
+    <div class="box-body">
+      <strong>Supported intent types</strong>
+      bgp · interface · vlan · route · ospf · prefix-list · ntp · snmp · banner
+    </div>
+  </div>
+
+  <h3>Supported Platform Strings</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>platform: value</th><th>Vendor</th><th>Protocol</th><th>Output</th></tr></thead>
+    <tbody>
+      <tr><td>arista_eos</td><td>Arista EOS</td><td>SSH/Scrapli</td><td>JSON (| json)</td></tr>
+      <tr><td>cisco_ios</td><td>Cisco IOS / IOS-XE</td><td>SSH/Scrapli</td><td>Regex/TextFSM</td></tr>
+      <tr><td>cisco_nxos</td><td>Cisco NX-OS</td><td>SSH/NX-API</td><td>JSON (| json)</td></tr>
+      <tr><td>juniper_junos</td><td>Juniper JunOS</td><td>SSH/Scrapli</td><td>XML (display xml)</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ═══════════════════ ENVIRONMENT VARIABLES ═══════════════════ -->
+<section id="env">
+  <div class="section-num">05 — Configuration</div>
+  <h2>ENVIRONMENT VARIABLES</h2>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>PLEXAR_INVENTORY</td><td>inventory.yaml</td><td>Default inventory path for CLI</td></tr>
+      <tr><td>PLEXAR_AI_MODEL</td><td>gpt-4o-mini</td><td>AI model for parser/RCA/query</td></tr>
+      <tr><td>PLEXAR_AI_BACKEND</td><td>auto</td><td>auto | local | openai | anthropic</td></tr>
+      <tr><td>OPENAI_API_KEY</td><td>—</td><td>Required for OpenAI-backed AI features</td></tr>
+      <tr><td>ANTHROPIC_API_KEY</td><td>—</td><td>Alternative to OpenAI</td></tr>
+      <tr><td>VAULT_ADDR</td><td>—</td><td>HashiCorp Vault server URL</td></tr>
+      <tr><td>VAULT_TOKEN</td><td>—</td><td>Vault authentication token</td></tr>
+      <tr><td>NETBOX_TOKEN</td><td>—</td><td>NetBox API token</td></tr>
+      <tr><td>NAUTOBOT_TOKEN</td><td>—</td><td>Nautobot API token</td></tr>
+      <tr><td>PLEXAR_LOG_LEVEL</td><td>INFO</td><td>DEBUG | INFO | WARNING | ERROR</td></tr>
+      <tr><td>PLEXAR_PLATFORM_URL</td><td>—</td><td>Platform server URL (v2, reserved)</td></tr>
+      <tr><td>PLEXAR_PLATFORM_TOKEN</td><td>—</td><td>Platform auth token (v2, reserved)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="box warn">
+    <div class="box-icon">⚠️</div>
+    <div class="box-body">
+      <strong>Never hardcode credentials</strong>
+      Always use <code>password_env: VAR_NAME</code> in inventory.yaml — never <code>password: literal_value</code>. The sanitizer redacts credentials in logs, but they should never be in files committed to version control.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ v2 PLATFORM ═══════════════════ -->
+<section id="platform">
+  <div class="section-num">06 — Roadmap</div>
+  <h2>V2 PLATFORM</h2>
+  <p>Plexar v1 is the tool. v2 adds the platform — an always-on server that wraps the same SDK. The tool works standalone forever; the platform adds persistence, HA, multi-user, and a web UI.</p>
+
+  <h3>Architecture</h3>
+  <div class="arch">
+    <div class="arch-label">User interfaces</div>
+    <div class="arch-row">
+      <div class="arch-layer L1">plexar CLI (laptop)</div>
+      <div class="arch-layer L1">Web UI (React)</div>
+      <div class="arch-layer L1">CI/CD API calls</div>
+    </div>
+    <div class="arch-arrow">↓  REST + WebSocket</div>
+    <div class="arch-row">
+      <div class="arch-layer L2">Platform API Server (FastAPI)</div>
+    </div>
+    <div class="arch-arrow">↓</div>
+    <div class="arch-row">
+      <div class="arch-layer L3">Job Queue (Redis + arq)</div>
+      <div class="arch-layer L3">Leader Election (singleton tasks)</div>
+    </div>
+    <div class="arch-arrow">↓</div>
+    <div class="arch-row">
+      <div class="arch-layer L4">Plexar Workers (plexar-core SDK)</div>
+    </div>
+    <div class="arch-arrow">↓</div>
+    <div class="arch-row">
+      <div class="arch-layer L5">PostgreSQL (state)</div>
+      <div class="arch-layer L5">Redis (queue/cache)</div>
+      <div class="arch-layer L5">S3 (snapshots/reports)</div>
+    </div>
+  </div>
+
+  <h3>What the Platform Adds</h3>
+  <div class="grid-2">
+    <div class="card"><h4>Always-on monitoring</h4><p>Drift detection, telemetry, gNMI subscriptions run continuously — not just when you run a command.</p></div>
+    <div class="card"><h4>Multi-user RBAC</h4><p>Login via SSO/OIDC. Full per-user audit trail. Four-eyes approval for high-risk operations.</p></div>
+    <div class="card"><h4>HA & job persistence</h4><p>Operations survive server restarts. Mid-flight intent applies resume from checkpoint. Active-passive failover.</p></div>
+    <div class="card"><h4>Web dashboard</h4><p>Fleet health at a glance. Operation history. Compliance scores. Audit log search.</p></div>
+    <div class="card"><h4>Multi-tenancy</h4><p>Teams are isolated at the data layer. Team A cannot see Team B's devices, operations, or audit logs.</p></div>
+    <div class="card"><h4>Webhook receivers</h4><p>Real-time inventory sync from NetBox/Nautobot change events — no polling required.</p></div>
+  </div>
+
+  <h3>Migration is Just a Config Change</h3>
+  <p>When you deploy the platform, upgrading the tool to use it requires changing three lines in <code>~/.plexar/config.yaml</code>:</p>
+  <pre><code><span class="c"># Before: tool runs standalone</span>
+tool:
+  inventory: ./inventory.yaml
+
+<span class="c"># After: tool routes through platform</span>
+tool:
+  inventory: ./inventory.yaml
+platform:
+  url: https://plexar.corp.com
+  token_env: PLEXAR_PLATFORM_TOKEN</code></pre>
+  <p>All CLI commands, all Python SDK calls, all intent YAML files remain unchanged. The execution moves to the platform. The interface stays the same.</p>
+
+  <h3>Package Split</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Package</th><th>Install</th><th>Contains</th></tr></thead>
+    <tbody>
+      <tr><td>plexar-core</td><td>pip install plexar-core</td><td>SDK, drivers, security — no CLI</td></tr>
+      <tr><td>plexar</td><td>pip install plexar</td><td>plexar-core + CLI (today's package)</td></tr>
+      <tr><td>plexar-platform</td><td>pip install plexar-platform</td><td>API server, workers, web UI</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="box info">
+    <div class="box-icon">ℹ️</div>
+    <div class="box-body">
+      <strong>All three share the same plexar namespace</strong>
+      <code>from plexar import Network</code> works whether you have <code>plexar</code> or <code>plexar-core</code> installed. The tool and platform always ship the same version number. plexar-core 0.6.0 + plexar 0.6.0 + plexar-platform 0.6.0.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ TROUBLESHOOTING ═══════════════════ -->
+<section id="troubleshoot">
+  <div class="section-num">07 — Troubleshooting</div>
+  <h2>COMMON ISSUES</h2>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Error</th><th>Cause</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td>ModuleNotFoundError: click</td><td>CLI extra not installed</td><td><code>pip install plexar[cli]</code></td></tr>
+      <tr><td>ConnectionError: Authentication failed</td><td>Wrong credentials</td><td>Check <code>password_env</code> var is exported</td></tr>
+      <tr><td>DriverNotFound: unknown platform 'X'</td><td>Platform string typo or missing plugin</td><td>Check spelling: arista_eos, cisco_ios, cisco_nxos, juniper_junos</td></tr>
+      <tr><td>ValueError: Input failed sanitization</td><td>Hostname/command has shell metacharacters</td><td>Remove semicolons, pipes, backticks from input</td></tr>
+      <tr><td>PermissionError: Role VIEWER cannot push_config</td><td>RBAC context too low</td><td>Set PLEXAR_ROLE=ENGINEER in environment</td></tr>
+      <tr><td>AIParser: No API key configured</td><td>Missing LLM credentials</td><td>Set OPENAI_API_KEY or use --backend local</td></tr>
+      <tr><td>NetworkX not found</td><td>Topology extra missing</td><td><code>pip install plexar[topology]</code></td></tr>
+      <tr><td>Timeout on large fleet</td><td>Default pool too small</td><td>Increase: net.pool(max_connections=50)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Debug Mode</h3>
+  <pre><code><span class="c"># Enable debug logging</span>
+export PLEXAR_LOG_LEVEL=DEBUG
+plexar bgp show spine-01
+
+<span class="c"># Or in Python</span>
+<span class="k">import</span> logging
+logging.basicConfig(level=logging.DEBUG)</code></pre>
+
+  <h3>Test Connectivity Without Running Plexar</h3>
+  <pre><code><span class="c"># Test SSH manually</span>
+ssh -v admin@192.168.1.1
+
+<span class="c"># Test from Python</span>
+python3 -c "
+import asyncio, asyncssh
+async def test():
+    async with asyncssh.connect('192.168.1.1', username='admin',
+                                 password='yourpassword',
+                                 known_hosts=None) as conn:
+        result = await conn.run('show version')
+        print(result.stdout[:200])
+asyncio.run(test())
+"</code></pre>
+</section>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<hr>
+<div style="text-align:center; padding: 2rem 0; font-family: var(--mono); font-size: 0.72rem; color: var(--text3);">
+  <div style="font-family: var(--display); font-size: 1.8rem; color: var(--cyan); margin-bottom: 0.5rem;">⚡ PLEXAR v0.5.0</div>
+  The nervous system for your network.<br>
+  Apache 2.0 · Python 3.10+ · 16,589 lines · 75 source files
+</div>
+
+</div><!-- .page -->
+</body>
+</html>

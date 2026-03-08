@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "plexar"
-version = "0.1.0a1"
+version = "0.5.0"
 description = "The nervous system for your network — a unified, async-first Python SDK for network automation."
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -41,13 +41,27 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-netconf = [
-    "ncclient>=0.6",
+cli = [
+    "click>=8.1",
+    "rich>=13.0",
+]
+nautobot = [
+    "requests>=2.31",
 ]
 gnmi = [
     "grpcio>=1.60",
     "grpcio-tools>=1.60",
     "protobuf>=4.25",
+    "pygnmi>=0.8",
+]
+topology = [
+    "networkx>=3.2",
+]
+vault = [
+    "hvac>=2.0",
+]
+keyring = [
+    "keyring>=24.0",
 ]
 ai = [
     "litellm>=1.20",        # model-agnostic LLM calls
@@ -55,6 +69,16 @@ ai = [
 ]
 netbox = [
     "pynetbox>=7.3",
+]
+netconf = [
+    "ncclient>=0.6",
+]
+discovery = [
+    # Async-native SNMP library for device sweep and fingerprinting.
+    # puresnmp chosen over pysnmp for its clean async API and active maintenance.
+    # Used by: plexar discover (coming in a future release).
+    # Namespace reserved — discovery CLI commands are not yet implemented.
+    "puresnmp>=2.0",
 ]
 telemetry = [
     "opentelemetry-sdk>=1.22",
@@ -73,8 +97,11 @@ dev = [
     "faker>=22.0",
 ]
 all = [
-    "plexar[netconf,gnmi,ai,netbox,telemetry]",
+    "plexar[netconf,gnmi,ai,netbox,nautobot,telemetry,topology,vault,keyring,cli,discovery]",
 ]
+
+[project.scripts]
+plexar = "plexar.cli.main:main"
 
 [project.urls]
 Homepage    = "https://plexar.dev"
